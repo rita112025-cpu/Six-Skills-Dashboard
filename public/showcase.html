@@ -31,8 +31,8 @@ try{document.documentElement.setAttribute("data-theme", localStorage.getItem("sk
     --border:#27272a;
     --border-soft:#1e1e22;
     --text:#f4f4f5;
-    --text-dim:#a1a1aa;
-    --text-faint:#71717a;
+    --text-dim:#d4d4d8;
+    --text-faint:#b4b4be;
     --accent:#8b5cf6;
     --accent-strong:#a78bfa;
     --accent-soft:rgba(139,92,246,.14);
@@ -154,10 +154,10 @@ try{document.documentElement.setAttribute("data-theme", localStorage.getItem("sk
   /* terminal 視窗（永遠深色，像真的 terminal） */
   .term{border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow-card);background:#0b0b0e;}
   .term-bar{display:flex;align-items:center;gap:.45rem;padding:.55rem .8rem;border-bottom:1px solid #232327;background:#101014;}
-  .term-name{font-family:var(--mono);font-size:.72rem;color:#a1a1aa;margin-left:.3rem;}
-  .term-chip{margin-left:auto;font-family:var(--mono);font-size:.58rem;color:#71717a;border:1px solid #2e2e33;border-radius:999px;padding:.12rem .5rem;white-space:nowrap;}
+  .term-name{font-family:var(--mono);font-size:.72rem;color:#d4d4d8;margin-left:.3rem;}
+  .term-chip{margin-left:auto;font-family:var(--mono);font-size:.58rem;color:#b4b4be;border:1px solid #2e2e33;border-radius:999px;padding:.12rem .5rem;white-space:nowrap;}
   .term-body{padding:.85rem 1rem;font-family:var(--mono);font-size:.72rem;line-height:1.95;color:#d4d4d8;}
-  .term-body .dim{color:#8a8a93;}
+  .term-body .dim{color:#b4b4be;}
   .t-line{display:flex;gap:.6rem;align-items:baseline;}
   .t-line .dim{margin-left:auto;text-align:right;}
   .t-num{display:inline-block;width:1.6em;flex-shrink:0;}
@@ -203,6 +203,7 @@ try{document.documentElement.setAttribute("data-theme", localStorage.getItem("sk
   .pill .cnt{font-family:var(--mono);font-size:.68rem;opacity:.7;}
   .pill[data-active="true"]{background:var(--text);color:var(--bg);border-color:var(--text);font-weight:600;}
   .pill[data-active="true"] .cnt{opacity:.85;}
+  :root[data-theme="dark"] .pill .cnt{opacity:1;}
   .pill[data-active="true"] .dot{background:currentColor;}
   .pill[data-active="true"][data-filter="rated"]{background:var(--amber);color:var(--on-amber);border-color:transparent;}
   .pill[data-active="true"][data-stage]{background:var(--c);color:var(--on-c);border-color:transparent;}
