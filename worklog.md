@@ -35,3 +35,21 @@ Stage Summary:
 - 主頁 6 → 16 個 skill；10 張新卡帶 🟢 NEW 標籤與已查證的 GitHub 來源連結。
 - 階段對映：01-需求 +2（find-skills、grill-me）、02-開發 +3（prototype、diagnosing-bugs、subagent-driven-development）、03-UI +2（frontend-design、image-to-code）、05-驗收 +1（agent-browser）、07-工具 +2（skill-creator、mcp-builder）。
 - 維護方式不變：加 / 改 skill 只動 SKILLS 一個物件；badge 為選填欄位，不填即不顯示。
+
+---
+Task ID: 3
+Agent: ZCode (main)
+Task: showcase.html 改版為 zinc + violet 雙主題（暗版 / 亮版可切換），樣式對齊使用者提供的 React artifact 參考檔（C:\Users\rita1\Downloads\Six-Skills-Dashboard.html）；順手修復 GitHub Pages 根路徑。
+
+Work Log:
+- 解構參考檔（minified React bundle）：設計語言 = zinc 中性色 + violet accent、Inter + Noto Sans TC + JetBrains Mono、macOS terminal 視窗（紅黃綠燈 + mono 檔名 + chip）、圓角 14-16px 卡片、dark/light class 條件樣式；版面 = micro label hero → 快速對照卡格 → workflow pipeline → 備忘 → 安裝方式 terminal。
+- 重寫 public/showcase.html：CSS 改為 :root[data-theme=dark|light] token 系統（階段色 --st-01~07 暗亮各一組；--on-c / --on-amber 對比字色）；新 topbar（sticky + blur + theme 按鈕）、hero 雙欄（title + workflow.pipeline.ts terminal 永遠深色，term-force scope 固定暗階段色）、grad-line 分隔、sec-head + sec-chip、暫不裝改 tag chip（第 7 候補/不裝/另外處理）、新增安裝方式 install.sh terminal、footer active-chip。
+- JS：STAGES 值改 CSS 變數；pillHTML 改發 --c inline var + 僅 stage pill 帶 data-stage；NOT_INSTALLED 加 tag 欄；新增 THEME_KEY（skills:theme）/ getTheme / applyTheme / bindTheme，init 先套主題；head 內 inline script 於 CSS 前設 data-theme 防閃屏。字體走 Google Fonts，離線自動退回系統字體。
+- GitHub Pages 根路徑原本是 Jekyll 渲染 README.md（非 dashboard）→ 加根目錄 index.html 轉址 stub 指向 public/showcase.html，維持單一資料來源。
+- 發現 .env 被 git 追蹤（初次 commit 即入）→ 內容僅本地 SQLite 路徑、無金鑰，git rm --cached 移除追蹤（檔案保留本地）。
+- 驗證：Node VM + DOM stub 實跑兩段 inline script，46 項斷言全過（applyTheme dark/light 切換、getTheme 讀 localStorage、16 卡/10 badge/pill 計數/7 步流程/4 ni tag/來源 URL/雙主題 token）。
+
+Stage Summary:
+- 主題切換：右上角按鈕，dark ⇄ light，存 localStorage（skills:theme），head 預載防閃屏；預設暗版。
+- 維護方式不變（SKILLS 單一物件）；主題色集中在 CSS 兩個 token 區塊。
+- Pages：https://rita112025-cpu.github.io/Six-Skills-Dashboard/ 根路徑現會轉址至 dashboard 本體。
