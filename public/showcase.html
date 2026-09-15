@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>6 個核心 Skill 總覽 · worklog</title>
-<meta name="description" content="grill-with-docs / vercel-react-best-practices / brainstorming / impeccable / seo-audit / ui-ux-pro-max — 可互動評分、階段篩選、一鍵複製安裝路徑。" />
+<title>16 個 Skill 總覽 · worklog</title>
+<meta name="description" content="16 個 skill 總覽：6 核心（grill-with-docs / vercel-react-best-practices / brainstorming / impeccable / seo-audit / ui-ux-pro-max）+ 10 堆疊（find-skills / grill-me / frontend-design / agent-browser / prototype / diagnosing-bugs / skill-creator / image-to-code / subagent-driven-development / mcp-builder）— 可互動評分、階段篩選、一鍵複製安裝路徑。" />
 <style>
   /* ============================================================
      設計 token — 改顏色改這裡就好
@@ -150,6 +150,12 @@
   }
   .card .src:hover{color:var(--amber);}
   .card .src .ext{font-size:.85rem;}
+  .card .name .mini-badge{
+    display:inline-block;white-space:nowrap;vertical-align:middle;
+    font-family:var(--mono);font-size:.6rem;font-weight:400;
+    color:var(--green);border:1px solid var(--green);border-radius:999px;
+    padding:.02rem .38rem;margin-left:.45rem;letter-spacing:.06em;
+  }
 
   .stage-tag{
     align-self:flex-start;font-family:var(--mono);font-size:.68rem;
@@ -317,21 +323,22 @@
   <header class="site">
     <div class="inner">
       <span class="badge">worklog</span>
-      <h1>🧰 6 個核心 Skill 總覽</h1>
-      <span class="sub">· 需求 → 開發 → UI → SEO → 驗收 → 發布</span>
+      <h1>🧰 16 個 Skill 總覽</h1>
+      <span class="sub">· 需求 → 開發 → UI → SEO → 驗收 → 發布 → 工具</span>
     </div>
   </header>
 
   <main>
     <p class="intro">
-      這頁把目前固定使用的 <b>6 個 skill</b> 集中總覽：<b>可點星星評分</b>（存瀏覽器本機）、<b>按階段篩選</b>、<b>一鍵複製安裝路徑</b>。
+      這頁把 <b>16 個 skill</b> 集中總覽：原本的 <b>6 個核心 skill</b>，加上新進的 <b>10 個堆疊 skill</b>（標 🟢 NEW，加起來 801 萬下載那組：發現 · 壓力測試 · 設計 · 瀏覽器 · 原型 · 除錯 · 視覺化 · 協調 · 工具建構）。<br>
+      <b>可點星星評分</b>（存瀏覽器本機）、<b>按階段篩選</b>、<b>一鍵複製安裝路徑</b>。
       評分資料存在 <code>localStorage</code>（key: <code>skills:ratings</code>），不同裝置不同步。
     </p>
 
     <section>
       <div class="toolbar">
         <div class="pills" id="pills"><!-- JS render --></div>
-        <div class="showing">📍 Showing <b id="showN">6</b> of <b id="showTotal">6</b> skills</div>
+        <div class="showing">📍 Showing <b id="showN">16</b> of <b id="showTotal">16</b> skills</div>
       </div>
 
       <div class="grid" id="grid"><!-- JS render --></div>
@@ -342,7 +349,7 @@
     </section>
 
     <section>
-      <h2 class="sec-title">🗺️ 工作流程 <span class="n">6 stages</span></h2>
+      <h2 class="sec-title">🗺️ 工作流程 <span class="n">7 stages</span></h2>
       <div class="flow" id="flow"><!-- JS render --></div>
     </section>
 
@@ -387,9 +394,10 @@ const STAGES = {
   "04-SEO":  "#2dd4bf",
   "05-驗收": "#a78bfa",
   "06-發布": "#fb923c",
+  "07-工具": "#58a6ff",
 };
 
-/* ---------- 2. 6 個核心 skill（單一資料來源） ---------- */
+/* ---------- 2. 16 個 skill（單一資料來源）：前 6 個核心 + 後 10 個堆疊（badge NEW） ---------- */
 /* 欄位：
    id        唯一識別（同時是 localStorage key）
    emoji     卡片圖示
@@ -399,6 +407,7 @@ const STAGES = {
    stars     建議度（1–5）
    level     建議度文字
    tag       評分 toast 用的短標籤
+   badge     選填：名稱旁的小標籤（新進堆疊用 NEW）
    desc      三行 ✅ 說明
    path      安裝路徑
 */
@@ -498,17 +507,189 @@ const SKILLS = [
       "每個 GitHub Pages 站上線前跑一次"
     ],
     path:"~/.claude/skills/seo-audit"
+  },
+  /* ----- 以下 10 個：新進堆疊（801 萬下載 · 10 Skills One Agent） ----- */
+  {
+    id:"find-skills",
+    emoji:"🔎",
+    name:"find-skills",
+    source:"https://github.com/vercel-labs/skills",
+    stage:"01-需求",
+    stars:4,
+    level:"堆疊入口",
+    tag:"能力發現",
+    badge:"NEW",
+    desc:[
+      "堆疊第 1 步「發現」：不知道用什麼 skill 時先問它",
+      "搜尋 skills.sh 生態系，回傳最適合的 skill 與來源",
+      "搭配 npx skills 直接安裝，整組堆疊的起點"
+    ],
+    path:"~/.claude/skills/find-skills"
+  },
+  {
+    id:"grill-me",
+    emoji:"🥩",
+    name:"grill-me",
+    source:"https://github.com/mattpocock/skills",
+    stage:"01-需求",
+    stars:4,
+    level:"想法壓測",
+    tag:"壓力測試",
+    badge:"NEW",
+    desc:[
+      "堆疊第 2 步「壓力測試」：對你的 plan 窮追猛打",
+      "問到設計完全收斂才放行，避免帶洞實作",
+      "與 grill-with-docs 分工：這管點子收斂，那管專案脈絡"
+    ],
+    path:"~/.claude/skills/grill-me"
+  },
+  {
+    id:"frontend-design",
+    emoji:"📐",
+    name:"frontend-design",
+    source:"https://github.com/anthropics/skills",
+    stage:"03-UI",
+    stars:4,
+    level:"官方設計",
+    tag:"設計打底",
+    badge:"NEW",
+    desc:[
+      "Anthropics 官方前端設計 skill",
+      "堆疊「設計」步：版面層級、質感、互動準則",
+      "與 ui-ux-pro-max 同陣線：先設計好，再交 impeccable 驗"
+    ],
+    path:"~/.claude/skills/frontend-design"
+  },
+  {
+    id:"agent-browser",
+    emoji:"🌐",
+    name:"agent-browser",
+    source:"https://github.com/vercel-labs/agent-browser",
+    stage:"05-驗收",
+    stars:4,
+    level:"瀏覽器操作",
+    tag:"瀏覽器工作",
+    badge:"NEW",
+    desc:[
+      "堆疊「瀏覽器工作」步：agent 直接操作瀏覽器",
+      "Rust CLI + snapshot refs，省 context、不碰脆弱的 DOM selector",
+      "開頁、點擊、截圖、QA 驗證一把罩"
+    ],
+    path:"~/.claude/skills/agent-browser"
+  },
+  {
+    id:"prototype",
+    emoji:"🧪",
+    name:"prototype",
+    source:"https://github.com/mattpocock/skills",
+    stage:"02-開發",
+    stars:3,
+    level:"先試後建",
+    tag:"原型製作",
+    badge:"NEW",
+    desc:[
+      "堆疊「原型製作」步：做丟棄式原型回答設計問題",
+      "驗證方向對不對，再投入正式實作",
+      "適合新功能走不定、需要快速試錯時"
+    ],
+    path:"~/.claude/skills/prototype"
+  },
+  {
+    id:"diagnosing-bugs",
+    emoji:"🐛",
+    name:"diagnosing-bugs",
+    source:"https://github.com/mattpocock/skills",
+    stage:"02-開發",
+    stars:5,
+    level:"除錯必備",
+    tag:"除錯紀律",
+    badge:"NEW",
+    desc:[
+      "堆疊「除錯」步：紀律化 debug 迴圈",
+      "建立重現 → 縮小範圍 → 假設 → 修復驗證",
+      "杜絕 AI 亂槍打鳥式改 code"
+    ],
+    path:"~/.claude/skills/diagnosing-bugs"
+  },
+  {
+    id:"skill-creator",
+    emoji:"🛠️",
+    name:"skill-creator",
+    source:"https://github.com/anthropics/skills",
+    stage:"07-工具",
+    stars:4,
+    level:"自造 skill",
+    tag:"工具建構",
+    badge:"NEW",
+    desc:[
+      "Anthropics 官方：把重複流程打包成新 skill",
+      "堆疊「工具建構」步：為下一輪執行打包工作流",
+      "從 SKILL.md 到描述調優，一條龍"
+    ],
+    path:"~/.claude/skills/skill-creator"
+  },
+  {
+    id:"image-to-code",
+    emoji:"🖼️",
+    name:"image-to-code",
+    source:"https://github.com/leonxlnx/taste-skill",
+    stage:"03-UI",
+    stars:3,
+    level:"圖轉 code",
+    tag:"視覺化",
+    badge:"NEW",
+    desc:[
+      "堆疊「視覺化」步：先生設計圖 → 分析 → 寫 code",
+      "taste-skill 反 AI slop，拒絕生成醜 UI",
+      "視覺重要的頁面先用圖定調再動工"
+    ],
+    path:"~/.claude/skills/image-to-code"
+  },
+  {
+    id:"subagent-driven-development",
+    emoji:"🧭",
+    name:"subagent-driven-development",
+    source:"https://github.com/obra/superpowers",
+    stage:"02-開發",
+    stars:4,
+    level:"任務協調",
+    tag:"協調",
+    badge:"NEW",
+    desc:[
+      "堆疊「協調」步：主 agent 拆任務派給 subagent",
+      "平行推進，主線 context 保持乾淨",
+      "大重構、多檔案任務特別有感"
+    ],
+    path:"~/.claude/skills/subagent-driven-development"
+  },
+  {
+    id:"mcp-builder",
+    emoji:"🔌",
+    name:"mcp-builder",
+    source:"https://github.com/anthropics/skills",
+    stage:"07-工具",
+    stars:3,
+    level:"自造 MCP",
+    tag:"工具建構",
+    badge:"NEW",
+    desc:[
+      "Anthropics 官方：直接幫你寫 MCP server",
+      "把內部 API / 資料接成 agent 可用的工具",
+      "堆疊出口：現成能力不夠就自造"
+    ],
+    path:"~/.claude/skills/mcp-builder"
   }
 ];
 
-/* ---------- 3. 工作流程 6 步 ---------- */
+/* ---------- 3. 工作流程 7 步 ---------- */
 const WORKFLOW = [
-  { num:"01 需求", stage:"01-需求", body:"<b>grill-with-docs</b> + <b>brainstorming</b> · 追問需求、產 ADR" },
-  { num:"02 開發", stage:"02-開發", body:"<b>vercel-react-best-practices</b> · 全程掛著套規範" },
-  { num:"03 UI",   stage:"03-UI",   body:"<b>ui-ux-pro-max</b>（做）→ <b>impeccable</b>（驗）" },
+  { num:"01 需求", stage:"01-需求", body:"<b>grill-with-docs</b> + <b>brainstorming</b> 追問需求、產 ADR · <b>find-skills</b> 找能力 · <b>grill-me</b> 壓力測試點子" },
+  { num:"02 開發", stage:"02-開發", body:"<b>vercel-react-best-practices</b> 全程套規範 · <b>prototype</b> 先試錯 · <b>subagent-driven-development</b> 拆任務 · <b>diagnosing-bugs</b> 除錯" },
+  { num:"03 UI",   stage:"03-UI",   body:"<b>frontend-design</b> / <b>ui-ux-pro-max</b>（做）→ <b>image-to-code</b> 從圖還原 → <b>impeccable</b>（驗）" },
   { num:"04 SEO",  stage:"04-SEO",  body:"<b>seo-audit</b> · meta / heading / 圖片 / crawl" },
-  { num:"05 驗收", stage:"05-驗收", body:"<b>Playwright</b> + verification-before-completion" },
-  { num:"06 發布", stage:"06-發布", body:"git review → commit → GitHub Pages smoke test" }
+  { num:"05 驗收", stage:"05-驗收", body:"<b>agent-browser</b> 瀏覽器互動驗證 + <b>Playwright</b> + verification-before-completion" },
+  { num:"06 發布", stage:"06-發布", body:"git review → commit → GitHub Pages smoke test" },
+  { num:"07 工具", stage:"07-工具", body:"<b>skill-creator</b> 打包重複流程 → <b>mcp-builder</b> 擴充能力，回饋下一輪循環" }
 ];
 
 /* ---------- 4. 暫不裝清單 ---------- */
@@ -521,13 +702,13 @@ const NOT_INSTALLED = [
 
 /* ---------- 5. 驗證清單 ---------- */
 const CHECKLIST = [
-  "6 個核心 skill 都已列表",
+  "16 個 skill 都已列表（6 核心 + 10 堆疊 NEW）",
   "來源連結可點擊（↗ 開新分頁）",
   "安裝路徑一鍵複製（📋 → 已複製）",
-  "工作流程 6 步完整",
+  "工作流程 7 步完整",
   "暫不裝清單附原因",
   "評分資料存 localStorage，重新整理保留",
-  "篩選 pill 與 Showing N of 6 即時連動"
+  "篩選 pill 與 Showing N of 16 即時連動"
 ];
 
 /* ============================================================
@@ -603,7 +784,7 @@ function cardHTML(s){
     <div class="card-head">
       <div class="emoji">${s.emoji}</div>
       <div class="titles">
-        <div class="name">${esc(s.name)}</div>
+        <div class="name">${esc(s.name)}${s.badge?`<span class="mini-badge">${esc(s.badge)}</span>`:""}</div>
         ${srcHTML}
       </div>
       <span class="stage-tag">${esc(s.stage)}</span>

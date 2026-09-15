@@ -18,3 +18,20 @@ Stage Summary:
 - 維護方式：改內容改 SKILLS / STAGES / WORKFLOW / NOT_INSTALLED / CHECKLIST 五個陣列即可，互動邏輯不需動。加第 7 個 skill = 加一個物件，Showing N / pill 計數 / 階段配色自動更新。
 - localStorage key: skills:ratings。評分僅存本機、不同裝置不同步。
 - 全部核心互動 Agent Browser 端對端驗證通過。
+
+---
+Task ID: 2
+Agent: ZCode (main)
+Task: 把「10個skills.jpg」截圖裡的 10 個代理 skill 加進主頁總覽，原本 6 個 → 16 個。
+
+Work Log:
+- 讀 10個skills.jpg：find-skills / grill-me / frontend-design / agent-browser / prototype / diagnosing-bugs / skill-creator / image-to-code / subagent-driven-development / mcp-builder（801 萬下載堆疊 · 10 Skills One Agent）。
+- 圖片中 3 個來源 URL 被截斷，以 WebSearch / WebFetch 查證：find-skills → vercel-labs/skills、agent-browser → vercel-labs/agent-browser、image-to-code → leonxlnx/taste-skill；並確認 mattpocock/skills 含 grill-me/prototype/diagnosing-bugs、anthropics/skills 含 frontend-design/skill-creator/mcp-builder、obra/superpowers 含 subagent-driven-development。
+- showcase.html：SKILLS 陣列加 10 個物件（badge:"NEW"）；STAGES 加「07-工具」(#58a6ff)；WORKFLOW 6 → 7 步（07 工具 = skill-creator → mcp-builder 回饋下一輪循環）；標題 / h1 / intro / Showing / CHECKLIST 全部 6 → 16；cardHTML 支援選填 mini-badge。
+- src/app/page.tsx iframe title 同步改「16 個 Skill 總覽」。
+- 驗證：本 session 無 node_repl MCP（browser-use 不可用）→ 改寫 Node VM + DOM stub 腳本實跑頁面 inline JS，37 項斷言全過：16 卡、10 個 NEW badge、pill 計數 4/4/4/1/1/2（06-發布 0 張自動隱藏）、流程圖 7 step、暫不裝維持 4 項、10 個來源 URL 與查證結果一致、無殘留「6 個核心」字樣。
+
+Stage Summary:
+- 主頁 6 → 16 個 skill；10 張新卡帶 🟢 NEW 標籤與已查證的 GitHub 來源連結。
+- 階段對映：01-需求 +2（find-skills、grill-me）、02-開發 +3（prototype、diagnosing-bugs、subagent-driven-development）、03-UI +2（frontend-design、image-to-code）、05-驗收 +1（agent-browser）、07-工具 +2（skill-creator、mcp-builder）。
+- 維護方式不變：加 / 改 skill 只動 SKILLS 一個物件；badge 為選填欄位，不填即不顯示。

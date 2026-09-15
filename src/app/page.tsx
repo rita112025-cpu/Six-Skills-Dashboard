@@ -2,7 +2,7 @@ export default function Home() {
   return (
     <iframe
       src="/showcase.html"
-      title="6 個核心 Skill 總覽"
+      title="16 個 Skill 總覽"
       style={{
         position: "fixed",
         inset: 0,
