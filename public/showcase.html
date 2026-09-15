@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>6 個核心 Skill 總覽 · worklog</title>
+<meta name="description" content="grill-with-docs / vercel-react-best-practices / brainstorming / impeccable / seo-audit / ui-ux-pro-max — 可互動評分、階段篩選、一鍵複製安裝路徑。" />
+<style>
+  /* ============================================================
+     設計 token — 改顏色改這裡就好
+     ============================================================ */
+  :root{
+    --bg:#0d1117;
+    --bg-soft:#161b22;
+    --bg-card:#161b22;
+    --border:#30363d;
+    --border-soft:#21262d;
+    --text:#e6edf3;
+    --text-dim:#8b949e;
+    --text-faint:#6e7681;
+    --amber:#fbbf24;
+    --amber-soft:#f59e0b;
+    --green:#3fb950;
+    --red:#f85149;
+    --radius:14px;
+    --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang TC","Microsoft JhengHei",Roboto,Helvetica,Arial,sans-serif;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--sans);
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+
+  /* sticky footer */
+  .wrap{min-height:100vh;display:flex;flex-direction:column;}
+  main{flex:1 0 auto;width:min(1080px,92vw);margin:0 auto;padding:2.5rem 0 3.5rem;}
+  footer{flex-shrink:0;border-top:1px solid var(--border);background:var(--bg-soft);}
+
+  /* ============================================================
+     Header
+     ============================================================ */
+  header.site{
+    border-bottom:1px solid var(--border);
+    background:linear-gradient(180deg,#0d1117 0%,#0a0e14 100%);
+  }
+  header.site .inner{
+    width:min(1080px,92vw);margin:0 auto;padding:2.25rem 0 1.5rem;
+    display:flex;align-items:center;gap:.9rem;flex-wrap:wrap;
+  }
+  header.site .badge{
+    font-family:var(--mono);font-size:.72rem;color:var(--green);
+    border:1px solid var(--green);padding:.15rem .55rem;border-radius:999px;
+    letter-spacing:.04em;
+  }
+  header.site h1{font-size:1.6rem;margin:0;font-weight:700;letter-spacing:-.01em;}
+  header.site .sub{color:var(--text-dim);font-size:.9rem;margin-left:.4rem;}
+
+  /* ============================================================
+     Sections
+     ============================================================ */
+  section{margin:2.5rem 0;}
+  .sec-title{
+    display:flex;align-items:center;gap:.5rem;
+    font-size:1.05rem;font-weight:700;margin:0 0 1rem;
+    color:var(--text);
+  }
+  .sec-title .n{
+    font-family:var(--mono);font-size:.72rem;color:var(--text-faint);
+    border:1px solid var(--border);padding:.1rem .45rem;border-radius:6px;
+  }
+
+  /* intro */
+  .intro{color:var(--text-dim);font-size:.95rem;}
+  .intro b{color:var(--text);}
+  .intro code{
+    font-family:var(--mono);font-size:.85em;background:var(--bg-soft);
+    border:1px solid var(--border-soft);padding:.1rem .4rem;border-radius:5px;color:var(--text);
+  }
+
+  /* ============================================================
+     Filter pills
+     ============================================================ */
+  .toolbar{
+    display:flex;align-items:center;justify-content:space-between;
+    gap:1rem;flex-wrap:wrap;margin:0 0 1.1rem;
+  }
+  .pills{display:flex;flex-wrap:wrap;gap:.5rem;}
+  .pill{
+    appearance:none;cursor:pointer;font-family:inherit;font-size:.82rem;
+    color:var(--text-dim);background:var(--bg-soft);border:1px solid var(--border);
+    padding:.4rem .85rem;border-radius:999px;transition:all .15s ease;
+    display:inline-flex;align-items:center;gap:.35rem;line-height:1;
+  }
+  .pill:hover{color:var(--text);border-color:#484f58;}
+  .pill .dot{width:8px;height:8px;border-radius:50%;background:currentColor;opacity:.85;}
+  .pill[data-active="true"]{
+    color:#0d1117;background:var(--text);border-color:var(--text);font-weight:600;
+  }
+  .pill[data-active="true"][data-stage]{
+    color:#0d1117;border-color:transparent;
+  }
+  .pill .cnt{font-family:var(--mono);font-size:.72rem;opacity:.7;}
+  .pill[data-active="true"] .cnt{opacity:.9;}
+
+  .showing{
+    font-family:var(--mono);font-size:.82rem;color:var(--text-dim);
+    white-space:nowrap;
+  }
+  .showing b{color:var(--text);}
+
+  /* ============================================================
+     Card grid
+     ============================================================ */
+  .grid{
+    display:grid;gap:1rem;
+    grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+  }
+  .card{
+    background:var(--bg-card);border:1px solid var(--border);
+    border-radius:var(--radius);padding:1.1rem 1.15rem 1.15rem;
+    display:flex;flex-direction:column;gap:.7rem;
+    position:relative;overflow:hidden;
+    transition:border-color .15s ease, transform .15s ease;
+  }
+  .card::before{
+    content:"";position:absolute;left:0;top:0;bottom:0;width:4px;
+    background:var(--stage-color, var(--border));
+  }
+  .card:hover{border-color:#484f58;}
+  .card[data-hidden="true"]{display:none;}
+
+  .card-head{display:flex;align-items:flex-start;gap:.65rem;}
+  .card .emoji{font-size:1.6rem;line-height:1;flex-shrink:0;}
+  .card .titles{flex:1 1 auto;min-width:0;}
+  .card .name{
+    font-family:var(--mono);font-size:.92rem;font-weight:600;color:var(--text);
+    word-break:break-all;
+  }
+  .card .src{
+    display:inline-flex;align-items:center;gap:.25rem;
+    font-size:.74rem;color:var(--text-dim);text-decoration:none;
+    margin-top:.15rem;
+  }
+  .card .src:hover{color:var(--amber);}
+  .card .src .ext{font-size:.85rem;}
+
+  .stage-tag{
+    align-self:flex-start;font-family:var(--mono);font-size:.68rem;
+    color:var(--stage-color,var(--text-dim));
+    border:1px solid var(--stage-color,var(--border));
+    padding:.1rem .5rem;border-radius:6px;line-height:1.4;
+    background:color-mix(in srgb, var(--stage-color, transparent) 10%, transparent);
+  }
+
+  .reco{
+    font-size:.78rem;color:var(--text-dim);
+    display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;
+  }
+  .reco .stars-inline{color:var(--amber);letter-spacing:1px;}
+  .reco .lvl{color:var(--text);font-weight:600;}
+
+  .desc{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.35rem;}
+  .desc li{
+    font-size:.84rem;color:var(--text-dim);line-height:1.5;
+    padding-left:1.05rem;position:relative;
+  }
+  .desc li::before{content:"✅";position:absolute;left:0;top:0;font-size:.8rem;}
+
+  .install{
+    display:flex;align-items:center;gap:.5rem;margin-top:.1rem;
+    background:var(--bg);border:1px solid var(--border-soft);
+    border-radius:8px;padding:.35rem .4rem .35rem .65rem;
+  }
+  .install .path{
+    font-family:var(--mono);font-size:.76rem;color:var(--text);
+    flex:1 1 auto;overflow-x:auto;white-space:nowrap;
+    scrollbar-width:none;
+  }
+  .install .path::-webkit-scrollbar{display:none;}
+  .install .copy{
+    appearance:none;cursor:pointer;background:transparent;border:0;
+    color:var(--text-dim);font-size:.95rem;line-height:1;padding:.3rem;
+    border-radius:6px;transition:all .15s ease;flex-shrink:0;
+  }
+  .install .copy:hover{color:var(--amber);background:var(--bg-soft);}
+  .install .copy[data-copied="true"]{color:var(--green);}
+
+  .rating-row{
+    display:flex;align-items:center;justify-content:space-between;gap:.5rem;
+    margin-top:.1rem;padding-top:.6rem;border-top:1px solid var(--border-soft);
+  }
+  .stars{display:inline-flex;gap:.18rem;}
+  .star{
+    appearance:none;background:transparent;border:0;cursor:pointer;
+    font-size:1.15rem;line-height:1;padding:.1rem;
+    color:var(--border);transition:transform .12s ease, color .12s ease;
+  }
+  .star:hover{transform:scale(1.3);}
+  .star[data-on="true"]{color:var(--amber);}
+  .star:focus-visible{outline:2px solid var(--amber);outline-offset:2px;border-radius:4px;}
+  .rating-meta{font-family:var(--mono);font-size:.72rem;color:var(--text-faint);}
+  .rating-meta b{color:var(--amber);}
+
+  /* empty state */
+  .empty{
+    display:none;text-align:center;padding:3rem 1rem;
+    border:1px dashed var(--border);border-radius:var(--radius);
+    color:var(--text-dim);
+  }
+  .empty[data-show="true"]{display:block;}
+  .empty .big{font-size:2rem;margin-bottom:.5rem;}
+
+  /* ============================================================
+     Workflow flowchart
+     ============================================================ */
+  .flow{
+    display:flex;flex-direction:column;gap:.5rem;
+    border:1px solid var(--border);border-radius:var(--radius);
+    padding:1rem;background:var(--bg-soft);
+  }
+  .step{
+    display:flex;align-items:stretch;gap:.8rem;
+    padding:.7rem .85rem;border-radius:10px;
+    border:1px solid var(--border-soft);background:var(--bg);
+    border-left:4px solid var(--step-color,var(--border));
+  }
+  .step .num{
+    font-family:var(--mono);font-size:.72rem;color:var(--step-color,var(--text-dim));
+    flex-shrink:0;width:4.5rem;letter-spacing:.02em;
+  }
+  .step .body{flex:1 1 auto;font-size:.86rem;color:var(--text-dim);}
+  .step .body b{color:var(--text);font-family:var(--mono);font-size:.82rem;}
+  .step .arrow{
+    display:flex;align-items:center;justify-content:center;
+    color:var(--text-faint);font-size:1rem;height:.7rem;margin-left:0;
+  }
+  .arrow-down{display:flex;justify-content:center;color:var(--text-faint);font-size:.9rem;line-height:1;}
+
+  /* ============================================================
+     Not installed
+     ============================================================ */
+  .ni-list{display:grid;gap:.6rem;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));}
+  .ni{
+    display:flex;gap:.7rem;align-items:flex-start;
+    border:1px solid var(--border);border-radius:10px;
+    padding:.7rem .85rem;background:var(--bg-soft);
+  }
+  .ni .x{color:var(--red);font-size:.9rem;flex-shrink:0;line-height:1.5;}
+  .ni .nm{font-family:var(--mono);font-size:.82rem;color:var(--text);font-weight:600;}
+  .ni .why{font-size:.8rem;color:var(--text-dim);margin-top:.1rem;line-height:1.45;}
+
+  /* ============================================================
+     Checklist
+     ============================================================ */
+  .checklist-box{
+    border:1px solid var(--border);border-radius:var(--radius);
+    padding:1rem 1.15rem;background:var(--bg-soft);
+  }
+  .checklist{list-style:none;margin:0 0 .9rem;padding:0;display:flex;flex-direction:column;gap:.45rem;}
+  .checklist li{font-size:.85rem;color:var(--text-dim);padding-left:1.4rem;position:relative;}
+  .checklist li::before{content:"✅";position:absolute;left:0;top:0;}
+  .checklist li b{color:var(--text);}
+  .clear-btn{
+    appearance:none;cursor:pointer;font-family:var(--mono);font-size:.78rem;
+    color:var(--text-dim);background:var(--bg);border:1px solid var(--border);
+    padding:.45rem .85rem;border-radius:8px;transition:all .15s ease;
+    display:inline-flex;align-items:center;gap:.4rem;
+  }
+  .clear-btn:hover{color:var(--red);border-color:var(--red);}
+  .clear-btn:disabled{opacity:.4;cursor:not-allowed;}
+
+  /* ============================================================
+     Footer
+     ============================================================ */
+  footer .inner{
+    width:min(1080px,92vw);margin:0 auto;padding:1.1rem 0;
+    display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;
+  }
+  footer .left{font-size:.8rem;color:var(--text-dim);}
+  footer .left b{color:var(--text);}
+  footer .right{font-family:var(--mono);font-size:.72rem;color:var(--text-faint);}
+
+  /* ============================================================
+     Toast
+     ============================================================ */
+  #toast{
+    position:fixed;left:50%;bottom:1.75rem;transform:translateX(-50%) translateY(1rem);
+    background:var(--bg-card);border:1px solid var(--border);
+    color:var(--text);font-size:.85rem;padding:.6rem 1rem;border-radius:10px;
+    box-shadow:0 8px 30px rgba(0,0,0,.4);
+    opacity:0;pointer-events:none;transition:opacity .2s ease, transform .2s ease;
+    z-index:50;font-family:var(--sans);max-width:90vw;text-align:center;
+  }
+  #toast[data-show="true"]{opacity:1;transform:translateX(-50%) translateY(0);}
+  #toast b{color:var(--amber);}
+
+  /* small screens */
+  @media (max-width:560px){
+    main{padding:1.5rem 0 2.5rem;}
+    header.site .inner{padding:1.5rem 0 1rem;}
+    header.site h1{font-size:1.3rem;}
+    .grid{grid-template-columns:1fr;}
+    .step .num{width:3.5rem;font-size:.68rem;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="site">
+    <div class="inner">
+      <span class="badge">worklog</span>
+      <h1>🧰 6 個核心 Skill 總覽</h1>
+      <span class="sub">· 需求 → 開發 → UI → SEO → 驗收 → 發布</span>
+    </div>
+  </header>
+
+  <main>
+    <p class="intro">
+      這頁把目前固定使用的 <b>6 個 skill</b> 集中總覽：<b>可點星星評分</b>（存瀏覽器本機）、<b>按階段篩選</b>、<b>一鍵複製安裝路徑</b>。
+      評分資料存在 <code>localStorage</code>（key: <code>skills:ratings</code>），不同裝置不同步。
+    </p>
+
+    <section>
+      <div class="toolbar">
+        <div class="pills" id="pills"><!-- JS render --></div>
+        <div class="showing">📍 Showing <b id="showN">6</b> of <b id="showTotal">6</b> skills</div>
+      </div>
+
+      <div class="grid" id="grid"><!-- JS render --></div>
+      <div class="empty" id="empty">
+        <div class="big">🚫</div>
+        還沒有已評分的 skill — <b>點星星試試</b>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="sec-title">🗺️ 工作流程 <span class="n">6 stages</span></h2>
+      <div class="flow" id="flow"><!-- JS render --></div>
+    </section>
+
+    <section>
+      <h2 class="sec-title">🚫 暫不裝 <span class="n">4 items</span></h2>
+      <div class="ni-list" id="niList"><!-- JS render --></div>
+    </section>
+
+    <section>
+      <h2 class="sec-title">✅ 驗證清單 <span class="n">self-check</span></h2>
+      <div class="checklist-box">
+        <ul class="checklist" id="checklist"><!-- JS render --></ul>
+        <button class="clear-btn" id="clearBtn">🧹 清除全部評分</button>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="inner">
+      <div class="left">單檔 HTML · 零依賴 · 改內容請見下方 <b>維護說明</b> · 評分僅存本機</div>
+      <div class="right">skills:ratings · localStorage</div>
+    </div>
+  </footer>
+</div>
+
+<div id="toast"></div>
+
+<!-- ============================================================
+     維護說明：
+     要加 / 改 skill，只要編輯下方 SKILLS 陣列裡的一個物件即可。
+     篩選 pill、Showing N of N、階段配色、評分、複製路徑全部自動推導。
+     要改階段顏色，改 STAGES。要改流程圖，改 WORKFLOW。
+     ============================================================ -->
+<script>
+"use strict";
+
+/* ---------- 1. 階段定義（id → 標籤 + 顏色） ---------- */
+const STAGES = {
+  "01-需求": "#3fb950",
+  "02-開發": "#f59e0b",
+  "03-UI":   "#f85149",
+  "04-SEO":  "#2dd4bf",
+  "05-驗收": "#a78bfa",
+  "06-發布": "#fb923c",
+};
+
+/* ---------- 2. 6 個核心 skill（單一資料來源） ---------- */
+/* 欄位：
+   id        唯一識別（同時是 localStorage key）
+   emoji     卡片圖示
+   name      skill 名稱
+   source    來源 URL（null = 無外部來源）
+   stage     對應 STAGES 的 key
+   stars     建議度（1–5）
+   level     建議度文字
+   tag       評分 toast 用的短標籤
+   desc      三行 ✅ 說明
+   path      安裝路徑
+*/
+const SKILLS = [
+  {
+    id:"grill-with-docs",
+    emoji:"🔥",
+    name:"grill-with-docs",
+    source:"https://github.com/exinfinite/mattpocock-skills",
+    stage:"01-需求",
+    stars:4,
+    level:"必裝",
+    tag:"需求守門員",
+    desc:[
+      "動工前追問需求細節、術語定義、決策理由",
+      "產出 CONTEXT.md 與 ADR，留下決策紀錄",
+      "日後回頭維護有跡可循，適合長期專案"
+    ],
+    path:"~/.claude/skills/grill-with-docs"
+  },
+  {
+    id:"brainstorming",
+    emoji:"💡",
+    name:"brainstorming",
+    source:"https://github.com/obra/superpowers",
+    stage:"01-需求",
+    stars:3,
+    level:"視情況",
+    tag:"方向把關",
+    desc:[
+      "強制「先討論方案 → 你批准 → 才實作」流程",
+      "新專案啟動、不確定怎麼做的功能時用",
+      "注意：不要讓它接管所有任務，小修小改跳過"
+    ],
+    path:"~/.claude/skills/brainstorming"
+  },
+  {
+    id:"vercel-react-best-practices",
+    emoji:"⚡",
+    name:"vercel-react-best-practices",
+    source:"https://github.com/vercel-labs/agent-skills",
+    stage:"02-開發",
+    stars:5,
+    level:"高頻使用",
+    tag:"高頻出場",
+    desc:[
+      "Vercel 官方 React / Next.js 效能與最佳實踐",
+      "40+ 條規則，AI 寫 code 時直接套用",
+      "6 個裡使用頻率最高，減少效能坑"
+    ],
+    path:"~/.claude/skills/vercel-react-best-practices"
+  },
+  {
+    id:"ui-ux-pro-max",
+    emoji:"🎨",
+    name:"ui-ux-pro-max",
+    source:null,
+    stage:"03-UI",
+    stars:4,
+    level:"補強判斷",
+    tag:"設計補手",
+    desc:[
+      "補強 AI 在視覺、排版、互動上的判斷力",
+      "工具首頁、教材網站、任何給人看的頁面",
+      "與 impeccable 分工：pro-max 做好，impeccable 驗證"
+    ],
+    path:"~/.claude/skills/ui-ux-pro-max"
+  },
+  {
+    id:"impeccable",
+    emoji:"🛡️",
+    name:"impeccable",
+    source:"https://github.com/pbakaus/impeccable",
+    stage:"03-UI",
+    stars:5,
+    level:"優先度最高",
+    tag:"All-time favorite",
+    desc:[
+      "23 個指令 + 61 個 deterministic UI 偵測器",
+      "把設計問題變成可檢查規則，部分不需 API key",
+      "符合「有驗收標準、不接受 AI 自稱完成」的工作偏好"
+    ],
+    path:"~/.claude/skills/impeccable"
+  },
+  {
+    id:"seo-audit",
+    emoji:"🔍",
+    name:"seo-audit",
+    source:"https://www.skills.sh/coreyhaines31/marketingskills/seo-audit",
+    stage:"04-SEO",
+    stars:4,
+    level:"上線前必跑",
+    tag:"上線前必跑",
+    desc:[
+      "檢查 title、meta、heading 結構、internal links",
+      "圖片 alt、crawlability、indexation 全面健檢",
+      "每個 GitHub Pages 站上線前跑一次"
+    ],
+    path:"~/.claude/skills/seo-audit"
+  }
+];
+
+/* ---------- 3. 工作流程 6 步 ---------- */
+const WORKFLOW = [
+  { num:"01 需求", stage:"01-需求", body:"<b>grill-with-docs</b> + <b>brainstorming</b> · 追問需求、產 ADR" },
+  { num:"02 開發", stage:"02-開發", body:"<b>vercel-react-best-practices</b> · 全程掛著套規範" },
+  { num:"03 UI",   stage:"03-UI",   body:"<b>ui-ux-pro-max</b>（做）→ <b>impeccable</b>（驗）" },
+  { num:"04 SEO",  stage:"04-SEO",  body:"<b>seo-audit</b> · meta / heading / 圖片 / crawl" },
+  { num:"05 驗收", stage:"05-驗收", body:"<b>Playwright</b> + verification-before-completion" },
+  { num:"06 發布", stage:"06-發布", body:"git review → commit → GitHub Pages smoke test" }
+];
+
+/* ---------- 4. 暫不裝清單 ---------- */
+const NOT_INSTALLED = [
+  { name:"supabase-postgres-best-practices", why:"第 7 個候補 · 碰到 Postgres / Supabase 專案再加載" },
+  { name:"brandkit",                         why:"還沒有品牌系統需求" },
+  { name:"browser-use",                      why:"已有 Playwright，功能重疊" },
+  { name:"shadcn/ui",                         why:"當元件庫用，不當 skill 裝" }
+];
+
+/* ---------- 5. 驗證清單 ---------- */
+const CHECKLIST = [
+  "6 個核心 skill 都已列表",
+  "來源連結可點擊（↗ 開新分頁）",
+  "安裝路徑一鍵複製（📋 → 已複製）",
+  "工作流程 6 步完整",
+  "暫不裝清單附原因",
+  "評分資料存 localStorage，重新整理保留",
+  "篩選 pill 與 Showing N of 6 即時連動"
+];
+
+/* ============================================================
+   以下為互動邏輯 — 一般不需改
+   ============================================================ */
+const STORAGE_KEY = "skills:ratings";
+let ratings = loadRatings();
+let activeFilter = "all"; // all | stage key | "rated"
+
+function loadRatings(){
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); }
+  catch(e){ return {}; }
+}
+function saveRatings(){
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(ratings)); }
+  catch(e){}
+}
+
+/* ---- toast ---- */
+let toastTimer = null;
+function toast(html){
+  const el = document.getElementById("toast");
+  el.innerHTML = html;
+  el.setAttribute("data-show","true");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>el.removeAttribute("data-show"), 1900);
+}
+
+/* ---- escape ---- */
+function esc(s){ return String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[c])); }
+
+/* ---- counts ---- */
+function stageCount(stage){
+  return SKILLS.filter(s => s.stage === stage).length;
+}
+function ratedCount(){
+  return SKILLS.filter(s => ratings[s.id]).length;
+}
+
+/* ---- render pills ---- */
+function renderPills(){
+  const root = document.getElementById("pills");
+  let html = pillHTML("all", "全部", SKILLS.length, "var(--text)", true);
+  Object.keys(STAGES).forEach(stage => {
+    const c = stageCount(stage);
+    if (c > 0) html += pillHTML(stage, stage, c, STAGES[stage], false);
+  });
+  html += pillHTML("rated", "⭐ 已評分", ratedCount(), "var(--amber)", false);
+  root.innerHTML = html;
+}
+function pillHTML(key, label, count, color, active){
+  const dot = key !== "all" && key !== "rated" ? `<span class="dot" style="color:${color}"></span>` : "";
+  return `<button class="pill" data-filter="${esc(key)}" data-stage="${key!=='all'&&key!=='rated'?key:''}" data-active="${active}">
+    ${dot}${esc(label)} <span class="cnt">${count}</span>
+  </button>`;
+}
+
+/* ---- render cards ---- */
+function renderCards(){
+  const root = document.getElementById("grid");
+  root.innerHTML = SKILLS.map(cardHTML).join("");
+  document.getElementById("showTotal").textContent = SKILLS.length;
+  bindCardEvents();
+  applyFilter();
+}
+function cardHTML(s){
+  const color = STAGES[s.stage] || "var(--border)";
+  const starsInline = "★".repeat(s.stars) + "☆".repeat(5 - s.stars);
+  const srcHTML = s.source
+    ? `<a class="src" href="${esc(s.source)}" target="_blank" rel="noopener noreferrer">${esc(s.source.replace(/^https?:\/\//,''))}<span class="ext">↗</span></a>`
+    : `<span class="src">— 自建 / 內建</span>`;
+  return `<article class="card" data-id="${esc(s.id)}" data-stage="${esc(s.stage)}" style="--stage-color:${color}">
+    <div class="card-head">
+      <div class="emoji">${s.emoji}</div>
+      <div class="titles">
+        <div class="name">${esc(s.name)}</div>
+        ${srcHTML}
+      </div>
+      <span class="stage-tag">${esc(s.stage)}</span>
+    </div>
+    <div class="reco">
+      <span class="stars-inline">${starsInline}</span>
+      <span class="lvl">${esc(s.level)}</span>
+    </div>
+    <ul class="desc">${s.desc.map(d=>`<li>${esc(d)}</li>`).join("")}</ul>
+    <div class="install">
+      <code class="path">${esc(s.path)}</code>
+      <button class="copy" data-copy="${esc(s.path)}" title="複製安裝路徑" aria-label="複製安裝路徑">📋</button>
+    </div>
+    <div class="rating-row">
+      <div class="stars" data-skill="${esc(s.id)}">
+        ${[1,2,3,4,5].map(n=>`<button class="star" data-n="${n}" data-on="${ratings[s.id]===n}" aria-label="${n} 顆星">★</button>`).join("")}
+      </div>
+      <div class="rating-meta">${ratings[s.id]?`<b>★ ${ratings[s.id]}/5</b>`:"未評分"}</div>
+    </div>
+  </article>`;
+}
+
+/* ---- bind events (delegation) ---- */
+function bindCardEvents(){
+  const grid = document.getElementById("grid");
+
+  // star clicks
+  grid.querySelectorAll(".stars").forEach(group => {
+    const id = group.getAttribute("data-skill");
+    group.querySelectorAll(".star").forEach(btn => {
+      const n = +btn.getAttribute("data-n");
+      btn.addEventListener("mouseenter", () => previewStars(group, n));
+      btn.addEventListener("mouseleave", () => previewStars(group, ratings[id]||0));
+      btn.addEventListener("click", () => {
+        if (ratings[id] === n) {
+          delete ratings[id];
+          toast(`已清除 <b>${esc(skillById(id).name)}</b> 評分`);
+        } else {
+          ratings[id] = n;
+          const sk = skillById(id);
+          const fullTag = n===5 ? ` — <b>${esc(sk.tag)}</b> · ${esc(sk.name)}` : ` — ${esc(sk.name)}`;
+          toast(`★ ${n}/5${fullTag}`);
+        }
+        saveRatings();
+        renderCards();
+        renderPills();
+        updateClearBtn();
+      });
+    });
+  });
+
+  // copy path
+  grid.querySelectorAll(".copy").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const text = btn.getAttribute("data-copy");
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch(e) {
+        // fallback
+        const ta = document.createElement("textarea");
+        ta.value = text; document.body.appendChild(ta);
+        ta.select(); document.execCommand("copy"); ta.remove();
+      }
+      btn.setAttribute("data-copied","true");
+      toast(`已複製 <b>${esc(text)}</b>`);
+      setTimeout(()=>btn.removeAttribute("data-copied"), 1200);
+    });
+  });
+}
+function previewStars(group, n){
+  group.querySelectorAll(".star").forEach(b=>{
+    const bn = +b.getAttribute("data-n");
+    b.setAttribute("data-on", bn <= n ? "true" : "false");
+  });
+}
+function skillById(id){ return SKILLS.find(s=>s.id===id); }
+
+/* ---- filter ---- */
+function applyFilter(){
+  let visible = 0;
+  document.querySelectorAll(".card").forEach(card => {
+    const id = card.getAttribute("data-id");
+    let show = true;
+    if (activeFilter === "rated")      show = !!ratings[id];
+    else if (activeFilter !== "all")   show = card.getAttribute("data-stage") === activeFilter;
+    card.setAttribute("data-hidden", show ? "false" : "true");
+    if (show) visible++;
+  });
+  document.getElementById("showN").textContent = visible;
+  // empty state only meaningful for "rated" filter
+  const empty = document.getElementById("empty");
+  empty.setAttribute("data-show", (activeFilter==="rated" && visible===0) ? "true" : "false");
+}
+
+/* ---- pills click ---- */
+function bindPills(){
+  document.getElementById("pills").addEventListener("click", e => {
+    const btn = e.target.closest(".pill");
+    if (!btn) return;
+    activeFilter = btn.getAttribute("data-filter");
+    document.querySelectorAll(".pill").forEach(p => p.setAttribute("data-active", p===btn ? "true" : "false"));
+    applyFilter();
+  });
+}
+
+/* ---- workflow ---- */
+function renderWorkflow(){
+  const root = document.getElementById("flow");
+  let html = "";
+  WORKFLOW.forEach((w, i) => {
+    const color = STAGES[w.stage] || "var(--border)";
+    html += `<div class="step" style="--step-color:${color}">
+      <div class="num">${esc(w.num)}</div>
+      <div class="body">${w.body}</div>
+    </div>`;
+    if (i < WORKFLOW.length - 1) {
+      html += `<div class="arrow-down">↓</div>`;
+    }
+  });
+  root.innerHTML = html;
+}
+
+/* ---- not installed ---- */
+function renderNotInstalled(){
+  document.getElementById("niList").innerHTML = NOT_INSTALLED.map(n =>
+    `<div class="ni">
+      <span class="x">🚫</span>
+      <div>
+        <div class="nm">${esc(n.name)}</div>
+        <div class="why">${esc(n.why)}</div>
+      </div>
+    </div>`
+  ).join("");
+}
+
+/* ---- checklist ---- */
+function renderChecklist(){
+  document.getElementById("checklist").innerHTML = CHECKLIST.map(c =>
+    `<li>${esc(c)}</li>`
+  ).join("");
+}
+
+/* ---- clear ratings ---- */
+function updateClearBtn(){
+  document.getElementById("clearBtn").disabled = ratedCount() === 0;
+}
+function bindClear(){
+  document.getElementById("clearBtn").addEventListener("click", () => {
+    if (ratedCount() === 0) return;
+    ratings = {};
+    saveRatings();
+    renderCards();
+    renderPills();
+    updateClearBtn();
+    toast("🧹 已清除全部評分");
+  });
+}
+
+/* ---- init ---- */
+function init(){
+  renderPills();
+  renderCards();
+  renderWorkflow();
+  renderNotInstalled();
+  renderChecklist();
+  bindPills();
+  bindClear();
+  updateClearBtn();
+}
+init();
+</script>
+</body>
+</html>
