@@ -1,0 +1,54 @@
+[
+  {
+    "id": "web",
+    "icon": "▶",
+    "name": "新網站 / 新頁面",
+    "why": "從模糊需求一路到上線驗收的預設路線",
+    "steps": [
+      "grill-with-docs",
+      "brainstorming",
+      "frontend-design",
+      "ui-ux-pro-max",
+      "vercel-react-best-practices",
+      "impeccable",
+      "seo-audit",
+      "agent-browser"
+    ]
+  },
+  {
+    "id": "bug",
+    "icon": "🐛",
+    "name": "修一個 bug",
+    "why": "先收斂問題再動手，避免亂槍打鳥",
+    "steps": [
+      "grill-me",
+      "diagnosing-bugs",
+      "vercel-react-best-practices",
+      "agent-browser"
+    ]
+  },
+  {
+    "id": "redesign",
+    "icon": "🎨",
+    "name": "改版既有 UI",
+    "why": "設計先行、驗收在後，兩邊都不缺",
+    "steps": [
+      "image-to-code",
+      "frontend-design",
+      "ui-ux-pro-max",
+      "impeccable",
+      "agent-browser"
+    ]
+  },
+  {
+    "id": "capability",
+    "icon": "🛠️",
+    "name": "擴充 agent 能力",
+    "why": "現成的不夠用時，從找到造的完整路徑",
+    "steps": [
+      "find-skills",
+      "skill-creator",
+      "mcp-builder"
+    ]
+  }
+]

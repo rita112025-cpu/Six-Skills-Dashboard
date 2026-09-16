@@ -131,18 +131,32 @@ bun install && bun run dev    # http://localhost:3000
 
 ## 🛠️ 維護方式
 
-所有內容都是 `public/showcase.html` 內的資料，**UI 上的每個數字都是推導出來的，沒有寫死**（加到 30 個 skill 也不用改任何文案）：
+`public/showcase.html` 是**生成出來的檔案**，不要直接手改它的資料。真正的資料來源是 `data/*.json`：
 
-| 資料 | 用途 |
+| 檔案 | 用途 |
 |---|---|
-| `ZCODE_LIMITS` | ZCode 官方限制，Health 檢查的依據 |
-| `AGENTS` | 支援的 agent 平台與各自的 skills 目錄 |
-| `STAGES` | 階段 → `kind:"pipeline"` 進流程圖、`kind:"tool"` 進 Dev Tools 區 |
-| `SKILLS` | registry 本體。加 skill = 加一個物件 |
-| `RECIPES` | 推薦使用順序 |
-| `NOT_RECOMMENDED` / `CHECKLIST` | 不建議安裝清單、自我驗證清單 |
+| `data/skills.json` | registry 本體。加 skill = 加一個物件 |
+| `data/stages.json` | 階段 → `kind:"pipeline"` 進流程圖、`kind:"tool"` 進 Dev Tools 區 |
+| `data/agents.json` | 支援的 agent 平台與各自的 skills 目錄 |
+| `data/recipes.json` | 推薦使用順序 |
+| `data/not-recommended.json` / `data/checklist.json` | 不建議安裝清單、自我驗證清單 |
+| `data/zcode-limits.json` / `data/claude-only-keys.json` | ZCode 官方限制、Claude 專屬 frontmatter 欄位，Health 檢查的依據 |
 
-主題色在 CSS 的 `:root[data-theme="dark"]` / `:root[data-theme="light"]` 兩個 token 區塊（含階段色 `--st-01` ~ `--st-08` 各一組）。
+改完 JSON，執行：
+
+```bash
+node scripts/build-showcase.js
+# 或
+bun run build:showcase
+```
+
+**UI 上的每個數字都是從這些資料推導出來的，沒有寫死**（加到 30 個 skill 也不用改任何文案）。`bun run dev` / `bun run build` 前會自動跑一次（`predev` / `prebuild` hook），一般情況不需要手動執行。
+
+build 腳本會先驗證資料完整性——`stage` 一定要存在於 `stages.json`、`relations` 與 `recipes` 的 skill id 一定要存在——資料錯了會直接報錯中止，不會生出壞掉的頁面。
+
+互動邏輯（搜尋、篩選、匯出…）與 CSS 不在 `data/` 裡，改 `scripts/showcase.template.html` 本體，重新 build 即可。
+
+主題色在 CSS 的 `:root[data-theme="dark"]` / `:root[data-theme="light"]` 兩個 token 區塊（含階段色 `--st-01` ~ `--st-08` 各一組），同樣在 `scripts/showcase.template.html` 裡。
 
 ### 排版規範
 
@@ -162,10 +176,15 @@ bun install && bun run dev    # http://localhost:3000
 ## 📁 專案結構
 
 ```
-public/showcase.html    # 交付檔（單檔零依賴，registry + 相容性 + health + 匯出）
-index.html              # GitHub Pages 首頁：轉址到 public/showcase.html
-src/app/page.tsx        # Next.js 外殼：全螢幕 iframe 載入 showcase.html
-worklog.md              # 開發記錄
+data/*.json                        # Skill registry 資料來源（唯一手動編輯的地方）
+scripts/showcase.template.html     # 版面 / CSS / 互動邏輯 + 一個資料注入標記
+scripts/build-showcase.js          # 組出 public/showcase.html，內含資料驗證
+public/showcase.html               # 交付檔（build 產物，單檔零依賴，不要手改）
+index.html                         # GitHub Pages 首頁：轉址到 public/showcase.html
+src/app/page.tsx                   # Next.js 外殼：全螢幕 iframe 載入 showcase.html
+worklog.md                         # 開發記錄
 ```
+
+`public/showcase.html` 本身仍然是單檔零依賴——`data/*.json` 只是維護時的來源，build 完之後產出的頁面跟以前一樣可以直接雙擊打開，或改名 `index.html` 丟進任何靜態空間上線，不需要 Node、不需要跑 build 腳本才能看。
 
 > 字體（Inter / Noto Sans TC / JetBrains Mono）由 Google Fonts 載入，離線時自動退回系統字體，功能不受影響。

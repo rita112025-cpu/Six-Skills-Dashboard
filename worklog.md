@@ -93,3 +93,49 @@ Stage Summary:
 - 修掉 3 個實際會導致裝錯東西的來源／路徑錯誤，並揭露 2 個 stub skill 的跨平台陷阱。
 - 維護方式：加 skill 仍然只動 SKILLS 一個物件；所有計數、pill、流程圖、統計條、README 表格全部自動推導。
 - 尚未做（使用者 P1/P2 清單）：skill dependency graph 視覺化、資料抽到 data/*.json、GitHub API 自動重新檢查、版本追蹤、使用統計。
+
+---
+Task ID: 5
+Agent: Claude Sonnet 5 (Claude Code)
+Task: 資料抽到 data/*.json —— 把 showcase.html 裡佔一半篇幅的 SKILLS / STAGES / AGENTS / RECIPES / NOT_RECOMMENDED / CHECKLIST / ZCODE_LIMITS 抽成獨立 JSON，維護不用再翻一個 2000 行的單檔。
+
+Work Log:
+- 用 Node vm 把 public/showcase.html 內的 <script> 實際跑一次（帶 DOM stub 讓 init() 能跑完），
+  在 script 最後 append 一行把所有 const 收進 globalThis.__DATA__，藉此拿到跟執行期完全一致的
+  物件（而不是手動用正規表達式去切 JS 原始碼），確保抽出來的資料是「真的在跑的那份」，不是照抄。
+- JSON.stringify 寫出 9 個檔案到 data/：skills.json（16 筆）、stages.json（8 個階段）、
+  agents.json（4 個平台）、recipes.json（4 條推薦流程）、not-recommended.json（5 筆）、
+  checklist.json（8 項）、zcode-limits.json、claude-only-keys.json、meta.json（verifiedAt）。
+- 原本的 public/showcase.html 搬到 scripts/showcase.template.html，把原本手寫的資料區塊
+  （0. ZCode 官方限制 … 到 CHECKLIST 收尾的 "];"）整段換成一個注入標記，CSS / HTML / 互動邏輯
+  一行不動。
+- 寫 scripts/build-showcase.js（純 Node、無外部套件）：讀 data/*.json，逐檔 JSON.stringify 回
+  `const NAME = {...};` 貼回模板標記處，寫出 public/showcase.html。
+  build 前會先驗證資料完整性：skill.stage 必須存在於 stages.json、skill.relations 與
+  recipe.steps 指到的 id 必須存在於 skills.json —— 錯了直接丟錯中止，不會生出跑不動的頁面
+  （故意把某 skill 的 stage 改成不存在的值測過，正確擋下並印出具體是哪個 skill / 哪個欄位錯）。
+- package.json 加 build:showcase script，並掛 predev / prebuild hook，讓 `bun run dev` /
+  `bun run build` 前自動重新產生 showcase.html，日常不需要記得手動跑。
+- 更新 scripts/showcase.template.html 開頭的維護說明註解，講清楚「這是生成檔案，改 data/*.json
+  再重新 build」；README 的維護方式與專案結構章節同步改寫，說明每個 data 檔案的用途與 build 指令。
+
+驗證:
+- 抽取時用同一個 vm context 執行原始 script 到跑完 init()，確認沒有 runtime error 才收資料，
+  避免抽到「寫在原始碼裡但實際上不會被賦值」的東西。
+- build 後跑先前那套 DOM stub 斷言（涵蓋 stats 推導、卡片渲染、health 分數範圍、搜尋 / 篩選、
+  export ZIP 內容）：116 項全過。
+- 用「剝掉資料區塊只留其餘部分」的方式，diff 重新 build 出的 public/showcase.html 與 git HEAD
+  版本：兩邊唯一差異是我主動改寫的維護說明註解本身，CSS / HTML / 互動邏輯 JS 逐行相同 —— 證明
+  這次重構沒有意外改到任何行為。
+- 驗證失敗路徑：手動把某 skill 的 stage 改成不存在的字串，build 立刻報錯並指出是哪個 skill、
+  哪個欄位、應該對照哪個檔案；改回來後重新 build 正常通過。
+- 瀏覽器實測 build 產物：畫面、統計條、流程圖、相容性、Health 顯示皆與重構前一致。
+
+Stage Summary:
+- data/*.json 現在是唯一的資料來源；public/showcase.html 變成 build 產物，仍然是單檔零依賴，
+  不需要跑 build 腳本才能打開或部署，只是「維護」這個動作換成改 JSON + 重新 build。
+- 加 / 刪一個 skill：改 data/skills.json 一個物件，跑 `bun run build:showcase`（或直接
+  `bun run dev` / `bun run build` 自動觸發），不用再滾 2000 行的 HTML 找資料在哪。
+- 資料被寫錯（stage 打錯字、relations 指到不存在的 id）會在 build 階段就擋下來，不會等到
+  瀏覽器裡才發現卡片壞掉。
+- 尚未做：dependency graph 視覺化、GitHub API 自動重新檢查來源是否異動、版本追蹤。
