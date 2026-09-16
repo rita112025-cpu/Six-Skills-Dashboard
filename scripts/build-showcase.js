@@ -53,11 +53,18 @@ function validate(data) {
 
   if (skillIds.size !== data.SKILLS.length) errors.push("data/skills.json 有重複的 id");
 
+  const VERSION_STATUSES = new Set(["verified", "unavailable", "error"]);
   data.SKILLS.forEach(s => {
     if (!stageKeys.has(s.stage)) errors.push(`skill "${s.id}" 的 stage "${s.stage}" 不存在於 data/stages.json`);
     Object.values(s.relations || {}).flat().forEach(rid => {
       if (!skillIds.has(rid)) errors.push(`skill "${s.id}" 的 relations 指向不存在的 id "${rid}"`);
     });
+    if (s.version && !VERSION_STATUSES.has(s.version.status)) {
+      errors.push(`skill "${s.id}" 的 version.status "${s.version.status}" 不是合法值（verified / unavailable / error）`);
+    }
+    if (s.version && s.version.status === "verified" && !/^[0-9a-f]{40}$/.test(s.version.commit || "")) {
+      errors.push(`skill "${s.id}" 標成 verified 但 version.commit 不是合法的 40 字元 SHA`);
+    }
   });
   data.RECIPES.forEach(r => {
     r.steps.forEach(id => {

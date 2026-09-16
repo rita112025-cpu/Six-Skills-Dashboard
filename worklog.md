@@ -139,3 +139,48 @@ Stage Summary:
 - 資料被寫錯（stage 打錯字、relations 指到不存在的 id）會在 build 階段就擋下來，不會等到
   瀏覽器裡才發現卡片壞掉。
 - 尚未做：dependency graph 視覺化、GitHub API 自動重新檢查來源是否異動、版本追蹤。
+
+---
+Task ID: 6
+Agent: Claude Sonnet 5 (Claude Code)
+Task: P2 ① Version tracking —— 幫每個 skill 記錄「現在查到的版本」，作為之後 GitHub 自動重檢（比對變動）與 dependency graph 的資料基礎。刻意只做記錄，不做比對，不混進 registry-upgrade 已合併的範圍。
+
+Work Log:
+- 從 main 開新分支 registry-version-tracking（前一輪 registry-upgrade 已 merge 到 main，PR #1）。
+- 寫 scripts/check-versions.js：對每個有 source + repoPath 的 skill，打 GitHub API
+  `GET /repos/{owner}/{repo}/commits?path={repoPath}&per_page=1` 拿「這個 SKILL.md 路徑本身」
+  最後一次被改動的 commit —— 特意不用 repo HEAD，避免 repo 裡其他檔案的異動誤標成這個 skill 變了。
+  三種狀態：verified（拿到 commit）、unavailable（沒有 source/repoPath，例如 ui-ux-pro-max 自建、
+  seo-audit 來源在 skills.sh 非 GitHub）、error（有來源但這次查詢失敗，保留上次記錄的 commit 不清空）。
+- 跑腳本，16 筆全部用真實 GitHub API 查過：14 個 verified（含完整 40 字元 SHA 與上游修改日期）、
+  2 個 unavailable，0 個 error。結果直接寫回 data/skills.json。
+- scripts/build-showcase.js 的 validate() 加兩條新規則：version.status 必須是三個合法值之一、
+  status 為 verified 時 commit 必須是合法的 40 字元 hex SHA —— 兩條都故意造壞資料測過，
+  build 正確中止並指出是哪個 skill、哪個欄位。
+- scripts/showcase.template.html 加 versionHTML()：verified 顯示「✓ commit 上游最後修改 X ·
+  今天驗證」；unavailable 完全不顯示（不假裝有版本，跟 Health 未驗證同一套誠實原則）；
+  error 顯示黃色警告並註明「顯示的是上次記錄」。CSS 新增 .ver 樣式，字級沿用 --fs-micro。
+- buildPluginFiles() 的 registry.json 匯出、README.md 匯出表格都加上 version 欄位/Commit 欄，
+  讓之後做「自動重檢」時，這份匯出資料本身就是可比對的基準線。
+- data/checklist.json 加一條「每個 skill 的版本皆為實際查詢結果；無公開來源的一律標未追蹤」。
+- package.json 加 check:versions script。刻意不掛進 predev/prebuild —— 這支會打外部 API、
+  看 rate limit 臉色，不該每次 dev/build 都跑，留給使用者手動觸發或未來排程。
+
+驗證:
+- 3 個造壞資料的測試：version.status 改成不存在的值 → build 擋下並指名 skill id 與欄位；
+  commit 改成非法字串 → build 擋下並指名同上；兩者都復原後重新 build 正常通過。
+- DOM stub 跑舊有 116 項斷言全過（沒有因為新欄位動到既有行為）；另外針對版本功能寫 27 項新斷言
+  （每個 skill 都有 version 欄位、14 verified/2 unavailable/0 error、所有 verified 的 commit
+  是合法 SHA、卡片有正確顯示 commit、unavailable 的卡片沒有 .ver 區塊、registry.json 與匯出
+  README 都帶上版本欄位、checklist 變 9 項）全過。
+- 瀏覽器實測 build 產物：grill-with-docs 卡片顯示「✓ 447ca70 上游最後修改 2026-08-15 ·
+  2026-09-16 驗證」；ui-ux-pro-max 與 seo-audit 卡片確認沒有 .ver 元素（用 querySelector 直接查證，
+  不是肉眼看漏）。
+
+Stage Summary:
+- data/skills.json 現在每筆都有 version 欄位，14 筆是真實 GitHub commit、2 筆誠實標未追蹤。
+- 這是資料基礎，還沒做「比對」——下一步（P2 ②）才是拿這裡記錄的 commit 跟最新 commit 比對，
+  標出 changed / unchanged / unavailable。
+- scripts/check-versions.js 可重複執行、可單獨排程，不影響一般 dev/build 流程。
+- 只做了 version tracking，沒有動 registry-upgrade 已合併的範圍，也沒有先做 GitHub 自動重檢或
+  dependency graph（照使用者指定順序：① version tracking → ② GitHub 重檢 → ③ dependency graph）。

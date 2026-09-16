@@ -8,6 +8,7 @@
     "prebuild": "node scripts/build-showcase.js",
     "build": "next build && cp -r .next/static .next/standalone/.next/ && cp -r public .next/standalone/",
     "build:showcase": "node scripts/build-showcase.js",
+    "check:versions": "node scripts/check-versions.js",
     "start": "NODE_ENV=production bun .next/standalone/server.js 2>&1 | tee server.log",
     "lint": "eslint .",
     "db:push": "prisma db push --accept-data-loss",

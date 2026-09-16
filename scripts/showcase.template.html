@@ -301,6 +301,12 @@ try{document.documentElement.setAttribute("data-theme", localStorage.getItem("sk
     overflow-wrap:anywhere;
   }
   .card .src:hover{color:var(--accent);text-decoration:underline;}
+  .ver{
+    display:flex;align-items:center;gap:.35rem;flex-wrap:wrap;line-height:1.5;
+    font-size:var(--fs-micro);color:var(--text-faint);margin-top:.15rem;
+  }
+  .ver code{font-family:var(--mono);color:var(--text-dim);background:var(--bg-inset);border-radius:6px;padding:.04rem .4rem;}
+  .ver.warn{color:var(--amber);}
 
   .stage-tag{
     align-self:flex-start;font-family:var(--mono);font-size:var(--fs-micro);
@@ -1006,6 +1012,23 @@ const MARK = { ok:"✓", partial:"⚠", unknown:"?" };
 const CLS  = { ok:"ok", partial:"warn", unknown:"unk" };
 const WORD = { ok:"支援", partial:"部分", unknown:"未驗證" };
 
+/* ---------- 版本追蹤 ----------
+   version 由 scripts/check-versions.js 寫入 data/skills.json：
+     verified    — 有拿到 GitHub 上該 SKILL.md 路徑最後一次被改動的 commit
+     unavailable — 沒有公開來源可查（自建 / 非 GitHub），不假裝有版本
+     error       — 查過但 API 失敗，仍顯示上次記錄的資料並標出查詢失敗    */
+function versionHTML(s){
+  const v = s.version;
+  if (!v || v.status === "unavailable") return "";
+  if (v.status === "error"){
+    const stale = v.commit ? ` 顯示的是 <code>${esc(v.commit.slice(0,7))}</code>（上次成功查詢的紀錄）` : "";
+    return `<div class="ver warn">⚠ ${esc(v.checkedAt)} 版本查詢失敗，${stale || "尚無歷史紀錄"}</div>`;
+  }
+  const short = v.commit ? v.commit.slice(0, 7) : "?";
+  const changed = v.commitDate ? esc(v.commitDate.slice(0, 10)) : "?";
+  return `<div class="ver">✓ <code>${esc(short)}</code> 上游最後修改 ${changed} · ${esc(v.checkedAt)} 驗證</div>`;
+}
+
 function cardHTML(s){
   const stage = STAGES[s.stage] || {};
   const color = stage.color || "var(--border)";
@@ -1015,6 +1038,7 @@ function cardHTML(s){
   const srcHTML = s.source
     ? `<a class="src" href="${esc(s.source)}" target="_blank" rel="noopener noreferrer">${esc(s.source.replace(/^https?:\/\//,""))}${s.repoPath ? " / " + esc(s.repoPath) : ""} ↗</a>`
     : `<span class="src">— 自建 / 無公開來源</span>`;
+  const verHTML = versionHTML(s);
 
   const badges = [
     s.tier === "core" ? `<span class="mini-badge core">CORE</span>` : "",
@@ -1053,6 +1077,7 @@ function cardHTML(s){
       <div class="titles">
         <div class="name">${esc(s.name)}${badges ? `<span class="badges">${badges}</span>` : ""}</div>
         ${srcHTML}
+        ${verHTML}
       </div>
       <span class="stage-tag">${esc(s.stage)}</span>
     </div>
@@ -1357,7 +1382,7 @@ function buildPluginFiles(){
       id:s.id, name:s.name, tier:s.tier, stage:s.stage, dir:s.dir,
       source:s.source, repoPath:s.repoPath, raw:rawURL(s),
       deps:s.deps, mcp:s.mcp, agents:s.agents, meta:s.meta,
-      relations:s.relations, health:health(s)
+      relations:s.relations, health:health(s), version:s.version || null
     }))
   };
 
@@ -1418,11 +1443,14 @@ function buildPluginFiles(){
     "",
     "## Skill 清單",
     "",
-    "| Skill | Tier | Stage | Health | Claude Code | ZCode | 來源 |",
-    "|---|---|---|---|---|---|---|"
+    "| Skill | Tier | Stage | Health | Claude Code | ZCode | Commit | 來源 |",
+    "|---|---|---|---|---|---|---|---|"
   ].concat(SKILLS.map(s => {
     const h = health(s);
-    return `| ${s.name} | ${s.tier} | ${s.stage} | ${h.score}/10 | ${MARK[s.agents["claude-code"]]} | ${MARK[s.agents.zcode]} | ${s.source ? s.repoPath ? `${s.source}/blob/HEAD/${s.repoPath}` : s.source : "自建"} |`;
+    const v = s.version;
+    const commitCell = !v || v.status === "unavailable" ? "—"
+      : v.commit ? `\`${v.commit.slice(0,7)}\`（${v.checkedAt}）` : "查詢失敗";
+    return `| ${s.name} | ${s.tier} | ${s.stage} | ${h.score}/10 | ${MARK[s.agents["claude-code"]]} | ${MARK[s.agents.zcode]} | ${commitCell} | ${s.source ? s.repoPath ? `${s.source}/blob/HEAD/${s.repoPath}` : s.source : "自建"} |`;
   })).concat([
     "",
     "## ZCode 限制（官方）",
