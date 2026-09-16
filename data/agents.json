@@ -1,0 +1,22 @@
+[
+  {
+    "id": "claude-code",
+    "label": "Claude Code",
+    "dir": "~/.claude/skills"
+  },
+  {
+    "id": "zcode",
+    "label": "ZCode",
+    "dir": "~/.zcode/skills"
+  },
+  {
+    "id": "codex",
+    "label": "Codex CLI",
+    "dir": "~/.codex/skills"
+  },
+  {
+    "id": "openclaw",
+    "label": "OpenClaw",
+    "dir": "~/.openclaw/skills"
+  }
+]

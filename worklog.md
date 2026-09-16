@@ -53,3 +53,89 @@ Stage Summary:
 - 主題切換：右上角按鈕，dark ⇄ light，存 localStorage（skills:theme），head 預載防閃屏；預設暗版。
 - 維護方式不變（SKILLS 單一物件）；主題色集中在 CSS 兩個 token 區塊。
 - Pages：https://rita112025-cpu.github.io/Six-Skills-Dashboard/ 根路徑現會轉址至 dashboard 本體。
+
+---
+Task ID: 4
+Agent: Claude Opus 5 (Claude Code)
+Task: clone 下來做優化 —— 檢查運作狀況、更新版面、重點字加大、明暗對比拉夠、檢查連結正確性；並依使用者提出的四層規劃（內容正確性 → Skill 架構 → ZCode 相容性 → Dashboard UX）升級成 Skill Registry。
+
+Work Log:
+- 連結檢查：13 個外部 URL 全部實際請求。10 個 GitHub repo + skills.sh 皆 200；兩個 404 是 fonts.googleapis.com / fonts.gstatic.com 的 preconnect origin（非可導覽連結，正常）。
+- 進一步用 GitHub API 列出每個 repo 的 SKILL.md 實際路徑，發現三個真錯誤：
+    1) vercel-react-best-practices 在 vercel-labs/agent-skills 內的目錄其實是 react-best-practices（frontmatter name 才是 vercel-react-best-practices）→ 原本的安裝路徑會裝不到東西。
+    2) image-to-code 在 leonxlnx/taste-skill 內的目錄是 image-to-code-skill。
+    3) grill-with-docs 原本指向 exinfinite/mattpocock-skills（fork），已改指上游 mattpocock/skills。
+       另確認 grill-me 實際路徑是 skills/productivity/grill-me（不在 engineering 下）。
+- 抓下 14 份真正的 SKILL.md 並解析 frontmatter，量到真實數據：description 長度 51–925 字元、body 0.03–35 KB、各自的額外 frontmatter 欄位。
+    - 重要發現：grill-with-docs / grill-me 本體只有 3 行，是轉呼叫 Claude Code Skill 工具的 stub，真正邏輯在 grilling / domain-modeling → 跨平台會失效，已標為 ZCode「部分支援」並列入不建議清單說明。
+    - impeccable description 895 字元，已接近 ZCode 的 1024 上限，卡片會亮 warn。
+    - agent-browser 以 allowed-tools 綁 Bash 權限且需先裝 npm CLI → 標部分支援。
+- 查證 ZCode 官方文件（zcode.z.ai/en/docs/skill 與 /plugin）：name/description 必填、description 上限 1024 字元（超過整包丟棄）、body 超過 100KB 截斷、plugin 結構為 .zcode-plugin/plugin.json + skills/<name>/SKILL.md、plugin.json 只有 name 必填且需符合 ^[a-z0-9][a-z0-9._-]{0,127}$。Health 檢查與匯出格式都照這份寫。
+- 重寫 public/showcase.html（1156 → 1939 行）：
+    [內容正確性] 所有數字改由資料推導（stats()），HTML 不再寫死 16 / 6 / 10 / 7；新增 tier 欄位讓 Core / Optional 自動計算。
+    [Skill 架構] STAGES 加 kind 欄位：pipeline 走流程圖、tool 獨立成 Dev Tools 區，find-skills / skill-creator / mcp-builder 脫離 pipeline；新增 05-測試 stage（diagnosing-bugs）與 06-驗收 / 07-發布；skill 之間加 relations（接在前 / 接在後 / 搭配），可點擊跳卡。
+    [ZCode 相容性] 每張卡加 Compatibility（4 個平台 ✓/⚠/?）與 Skill Health（逐項對照 ZCODE_LIMITS，0–10 分 + 進度條）。抓不到來源的一律標「未驗證」並排除在分母外，不假裝通過。
+    [Dashboard UX] 加搜尋框（多關鍵字 AND，/ 聚焦、Esc 清除）、三軸 pill（分類 / 階段 / Agent）、4 條推薦流程可一鍵複製、不建議清單改成 status + 替代方案、評分可匯出／匯入 JSON。
+- Plugin 匯出：用純 JS 寫最小 ZIP writer（store 法 + CRC32 表，無外部套件），輸出 .zcode-plugin/plugin.json、.claude-plugin/plugin.json、registry.json、fetch-skills.sh、fetch-skills.ps1、README.md。
+    刻意不產生假的 SKILL.md —— 第三方內文著作權屬原作者，改附已核對的 raw URL 與取檔腳本。
+- 排版：導入 1.125 模組化級距，內文 16px → 23px，全站最小字級 16px（原本有 .56rem ≈ 9px）；容器 1120px → 1440px；斷點整體上移（860/640 → 1100/860/520）；卡片 minmax 300 → 420px；sticky nav 76px 並同步 scroll-padding-top；新增 @media print 用 pt 級距；加 prefers-reduced-motion。
+- 對比：改寫暗亮兩組 token。亮版 --text-faint 由 #8a8a93（3.6:1，不合格）改 #5c5c66（6.6:1）、--amber 由 #d97706（3.4:1）改 #a35709（5.2:1）、--green 改 #116b33；暗版新增 --star-off 讓未評分星星從 1.3:1 提到 3.4:1；stage-tag 底色 tint 12% → 8%。
+
+驗證:
+- Node VM + DOM stub 實跑頁面 inline script：128 項斷言，127 過；唯一「失敗」是測試寫錯（全文搜尋 "zcode" 會命中 agentNote 裡提到 ZCode 的 impeccable，屬正確行為），已確認非程式問題。
+- ZIP 實際寫出後 unzip -t 通過，6 個檔案無錯誤；解開後跑 fetch-skills.sh，成功抓回 14 份 SKILL.md，逐一檢查都有 name 與 description。
+- 瀏覽器實測（http://localhost:4173）：搜尋 browser → 1 張、ui → 8 張、無結果 → empty state 出現；階段 03-UI → 4 張、分類 core → 6 張、Agent zcode → 10 張；評分寫入 localStorage 並跳 toast、rated 篩選 → 1 張、清除後回 {} 且按鈕 disabled；推薦流程切換正常；主題切換寫入 localStorage 並可切回。
+- 對比實測：頁內腳本走訪 1051 個文字元素，正確合成 alpha 疊層後計算對比，暗版與亮版各 0 項未達 WCAG AA（最低 3.5 / 3.57，皆落在大字 3:1 門檻項目）。
+- 排版驗證：最小 font-size 16px、body 23px、兩個 clamp 下限 38px / 32px，1440 / 756 / 375 寬皆無水平捲動。
+
+Stage Summary:
+- Dashboard 從「16 張展示卡」變成可查詢的 Skill Registry：相容性、Health、關聯、推薦流程、Plugin 匯出。
+- 修掉 3 個實際會導致裝錯東西的來源／路徑錯誤，並揭露 2 個 stub skill 的跨平台陷阱。
+- 維護方式：加 skill 仍然只動 SKILLS 一個物件；所有計數、pill、流程圖、統計條、README 表格全部自動推導。
+- 尚未做（使用者 P1/P2 清單）：skill dependency graph 視覺化、資料抽到 data/*.json、GitHub API 自動重新檢查、版本追蹤、使用統計。
+
+---
+Task ID: 5
+Agent: Claude Sonnet 5 (Claude Code)
+Task: 資料抽到 data/*.json —— 把 showcase.html 裡佔一半篇幅的 SKILLS / STAGES / AGENTS / RECIPES / NOT_RECOMMENDED / CHECKLIST / ZCODE_LIMITS 抽成獨立 JSON，維護不用再翻一個 2000 行的單檔。
+
+Work Log:
+- 用 Node vm 把 public/showcase.html 內的 <script> 實際跑一次（帶 DOM stub 讓 init() 能跑完），
+  在 script 最後 append 一行把所有 const 收進 globalThis.__DATA__，藉此拿到跟執行期完全一致的
+  物件（而不是手動用正規表達式去切 JS 原始碼），確保抽出來的資料是「真的在跑的那份」，不是照抄。
+- JSON.stringify 寫出 9 個檔案到 data/：skills.json（16 筆）、stages.json（8 個階段）、
+  agents.json（4 個平台）、recipes.json（4 條推薦流程）、not-recommended.json（5 筆）、
+  checklist.json（8 項）、zcode-limits.json、claude-only-keys.json、meta.json（verifiedAt）。
+- 原本的 public/showcase.html 搬到 scripts/showcase.template.html，把原本手寫的資料區塊
+  （0. ZCode 官方限制 … 到 CHECKLIST 收尾的 "];"）整段換成一個注入標記，CSS / HTML / 互動邏輯
+  一行不動。
+- 寫 scripts/build-showcase.js（純 Node、無外部套件）：讀 data/*.json，逐檔 JSON.stringify 回
+  `const NAME = {...};` 貼回模板標記處，寫出 public/showcase.html。
+  build 前會先驗證資料完整性：skill.stage 必須存在於 stages.json、skill.relations 與
+  recipe.steps 指到的 id 必須存在於 skills.json —— 錯了直接丟錯中止，不會生出跑不動的頁面
+  （故意把某 skill 的 stage 改成不存在的值測過，正確擋下並印出具體是哪個 skill / 哪個欄位錯）。
+- package.json 加 build:showcase script，並掛 predev / prebuild hook，讓 `bun run dev` /
+  `bun run build` 前自動重新產生 showcase.html，日常不需要記得手動跑。
+- 更新 scripts/showcase.template.html 開頭的維護說明註解，講清楚「這是生成檔案，改 data/*.json
+  再重新 build」；README 的維護方式與專案結構章節同步改寫，說明每個 data 檔案的用途與 build 指令。
+
+驗證:
+- 抽取時用同一個 vm context 執行原始 script 到跑完 init()，確認沒有 runtime error 才收資料，
+  避免抽到「寫在原始碼裡但實際上不會被賦值」的東西。
+- build 後跑先前那套 DOM stub 斷言（涵蓋 stats 推導、卡片渲染、health 分數範圍、搜尋 / 篩選、
+  export ZIP 內容）：116 項全過。
+- 用「剝掉資料區塊只留其餘部分」的方式，diff 重新 build 出的 public/showcase.html 與 git HEAD
+  版本：兩邊唯一差異是我主動改寫的維護說明註解本身，CSS / HTML / 互動邏輯 JS 逐行相同 —— 證明
+  這次重構沒有意外改到任何行為。
+- 驗證失敗路徑：手動把某 skill 的 stage 改成不存在的字串，build 立刻報錯並指出是哪個 skill、
+  哪個欄位、應該對照哪個檔案；改回來後重新 build 正常通過。
+- 瀏覽器實測 build 產物：畫面、統計條、流程圖、相容性、Health 顯示皆與重構前一致。
+
+Stage Summary:
+- data/*.json 現在是唯一的資料來源；public/showcase.html 變成 build 產物，仍然是單檔零依賴，
+  不需要跑 build 腳本才能打開或部署，只是「維護」這個動作換成改 JSON + 重新 build。
+- 加 / 刪一個 skill：改 data/skills.json 一個物件，跑 `bun run build:showcase`（或直接
+  `bun run dev` / `bun run build` 自動觸發），不用再滾 2000 行的 HTML 找資料在哪。
+- 資料被寫錯（stage 打錯字、relations 指到不存在的 id）會在 build 階段就擋下來，不會等到
+  瀏覽器裡才發現卡片壞掉。
+- 尚未做：dependency graph 視覺化、GitHub API 自動重新檢查來源是否異動、版本追蹤。

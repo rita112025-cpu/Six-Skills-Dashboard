@@ -2,7 +2,7 @@ export default function Home() {
   return (
     <iframe
       src="/showcase.html"
-      title="16 個 Skill 總覽"
+      title="Agent Skills Dashboard"
       style={{
         position: "fixed",
         inset: 0,

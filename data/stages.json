@@ -1,0 +1,50 @@
+{
+  "01-需求": {
+    "en": "Discovery",
+    "color": "var(--st-01)",
+    "kind": "pipeline",
+    "note": "把模糊想法逼成可執行規格"
+  },
+  "02-開發": {
+    "en": "Build",
+    "color": "var(--st-02)",
+    "kind": "pipeline",
+    "note": "套規範、先試錯、拆任務"
+  },
+  "03-UI": {
+    "en": "UI / UX",
+    "color": "var(--st-03)",
+    "kind": "pipeline",
+    "note": "先設計，再驗收"
+  },
+  "04-SEO": {
+    "en": "SEO",
+    "color": "var(--st-04)",
+    "kind": "pipeline",
+    "note": "上線前健檢"
+  },
+  "05-測試": {
+    "en": "Testing",
+    "color": "var(--st-05)",
+    "kind": "pipeline",
+    "note": "重現 → 縮小 → 修復驗證"
+  },
+  "06-驗收": {
+    "en": "Browser QA",
+    "color": "var(--st-06)",
+    "kind": "pipeline",
+    "note": "真的開瀏覽器點過一遍"
+  },
+  "07-發布": {
+    "en": "Release",
+    "color": "var(--st-07)",
+    "kind": "pipeline",
+    "note": "review → commit → smoke test"
+  },
+  "T-工具": {
+    "en": "Dev Tools",
+    "color": "var(--st-08)",
+    "kind": "tool",
+    "note": "產生新能力的元工具，不在流程線上"
+  }
+}

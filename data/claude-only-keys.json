@@ -1,0 +1,7 @@
+[
+  "disable-model-invocation",
+  "user-invocable",
+  "argument-hint",
+  "allowed-tools",
+  "hidden"
+]

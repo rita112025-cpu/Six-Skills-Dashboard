@@ -1,0 +1,32 @@
+[
+  {
+    "name": "supabase-postgres-best-practices",
+    "status": "LATER",
+    "why": "碰到 Postgres / Supabase 專案再加載，避免過早複雜化核心流程",
+    "alt": null
+  },
+  {
+    "name": "brandkit",
+    "status": "LATER",
+    "why": "還沒有品牌系統需求；leonxlnx/taste-skill 裡就有，要用隨時拿",
+    "alt": "image-to-code"
+  },
+  {
+    "name": "browser-use",
+    "status": "SKIP",
+    "why": "與 agent-browser 功能重疊，且已有 Playwright",
+    "alt": "agent-browser"
+  },
+  {
+    "name": "shadcn/ui",
+    "status": "OTHER",
+    "why": "這是元件庫不是 skill，用 npm 裝進專案即可",
+    "alt": null
+  },
+  {
+    "name": "grilling / domain-modeling",
+    "status": "LATER",
+    "why": "grill-with-docs 與 grill-me 其實是 stub，真正的邏輯在這兩個 skill 裡；只用 Claude Code 可先不管，要跨平台就必須一起裝",
+    "alt": "grill-with-docs"
+  }
+]

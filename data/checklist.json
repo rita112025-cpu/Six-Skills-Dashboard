@@ -1,0 +1,10 @@
+[
+  "所有數字（Skill 數、Core/Optional、階段數）皆由資料推導，沒有寫死",
+  "來源連結全部實際請求過，並核對 repo 內 SKILL.md 路徑存在",
+  "Health 檢查對照 ZCode 官方限制；抓不到來源的一律標「未驗證」而非假通過",
+  "搜尋可命中名稱、階段、說明、來源與 agent",
+  "工具類 skill 已脫離 pipeline，獨立在 Dev Tools 區",
+  "評分可匯出 / 匯入 JSON，換裝置不會消失",
+  "最小字級 16px，內文 23px；暗亮兩版對比皆達 WCAG AA",
+  "Plugin ZIP 內含 plugin.json 與各 skill 的取得指令，不偽造 SKILL.md 內容"
+]
