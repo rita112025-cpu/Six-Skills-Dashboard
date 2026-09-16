@@ -50,6 +50,13 @@
       "commitDate": "2026-08-15T20:48:40Z",
       "checkedAt": "2026-09-16",
       "status": "verified"
+    },
+    "recheck": {
+      "checkedAt": "2026-09-16",
+      "status": "unchanged",
+      "baselineCommit": "447ca70872026d5b79d6073a546dac082117fed7",
+      "latestCommit": "447ca70872026d5b79d6073a546dac082117fed7",
+      "latestCommitDate": "2026-08-15T20:48:40Z"
     }
   },
   {
@@ -97,6 +104,13 @@
       "commitDate": "2026-08-12T16:53:21Z",
       "checkedAt": "2026-09-16",
       "status": "verified"
+    },
+    "recheck": {
+      "checkedAt": "2026-09-16",
+      "status": "unchanged",
+      "baselineCommit": "b36e0829c6d0140e93cfef2ca599b1b07d4a7797",
+      "latestCommit": "b36e0829c6d0140e93cfef2ca599b1b07d4a7797",
+      "latestCommitDate": "2026-08-12T16:53:21Z"
     }
   },
   {
@@ -145,6 +159,13 @@
       "commitDate": "2026-04-14T11:00:18Z",
       "checkedAt": "2026-09-16",
       "status": "verified"
+    },
+    "recheck": {
+      "checkedAt": "2026-09-16",
+      "status": "unchanged",
+      "baselineCommit": "805687f34e8c10b420e3d11335a0ca2c3c90d992",
+      "latestCommit": "805687f34e8c10b420e3d11335a0ca2c3c90d992",
+      "latestCommitDate": "2026-04-14T11:00:18Z"
     }
   },
   {
@@ -187,6 +208,13 @@
       "commitDate": null,
       "checkedAt": "2026-09-16",
       "status": "unavailable"
+    },
+    "recheck": {
+      "checkedAt": "2026-09-16",
+      "status": "unavailable",
+      "baselineCommit": null,
+      "latestCommit": null,
+      "latestCommitDate": null
     }
   },
   {
@@ -243,6 +271,13 @@
       "commitDate": "2026-09-15T00:46:19Z",
       "checkedAt": "2026-09-16",
       "status": "verified"
+    },
+    "recheck": {
+      "checkedAt": "2026-09-16",
+      "status": "unchanged",
+      "baselineCommit": "0a4e72a254f3b175c95b36b82e5f2e60fa63f116",
+      "latestCommit": "0a4e72a254f3b175c95b36b82e5f2e60fa63f116",
+      "latestCommitDate": "2026-09-15T00:46:19Z"
     }
   },
   {
@@ -285,6 +320,13 @@
       "commitDate": null,
       "checkedAt": "2026-09-16",
       "status": "unavailable"
+    },
+    "recheck": {
+      "checkedAt": "2026-09-16",
+      "status": "unavailable",
+      "baselineCommit": null,
+      "latestCommit": null,
+      "latestCommitDate": null
     }
   },
   {
@@ -330,6 +372,13 @@
       "commitDate": "2026-07-06T18:36:12Z",
       "checkedAt": "2026-09-16",
       "status": "verified"
+    },
+    "recheck": {
+      "checkedAt": "2026-09-16",
+      "status": "unchanged",
+      "baselineCommit": "773fb2c7bbf16781670a3520affc4abd0c6151ae",
+      "latestCommit": "773fb2c7bbf16781670a3520affc4abd0c6151ae",
+      "latestCommitDate": "2026-07-06T18:36:12Z"
     }
   },
   {
@@ -380,6 +429,13 @@
       "commitDate": "2026-08-15T20:46:38Z",
       "checkedAt": "2026-09-16",
       "status": "verified"
+    },
+    "recheck": {
+      "checkedAt": "2026-09-16",
+      "status": "unchanged",
+      "baselineCommit": "fcf0071560d32913c9d4f820e0d7ca467c881619",
+      "latestCommit": "fcf0071560d32913c9d4f820e0d7ca467c881619",
+      "latestCommitDate": "2026-08-15T20:46:38Z"
     }
   },
   {
@@ -428,6 +484,13 @@
       "commitDate": "2026-08-19T09:56:39Z",
       "checkedAt": "2026-09-16",
       "status": "verified"
+    },
+    "recheck": {
+      "checkedAt": "2026-09-16",
+      "status": "unchanged",
+      "baselineCommit": "321658273cb1d20b76026717d027d505790106d4",
+      "latestCommit": "321658273cb1d20b76026717d027d505790106d4",
+      "latestCommitDate": "2026-08-19T09:56:39Z"
     }
   },
   {
@@ -473,6 +536,13 @@
       "commitDate": "2026-08-12T16:53:21Z",
       "checkedAt": "2026-09-16",
       "status": "verified"
+    },
+    "recheck": {
+      "checkedAt": "2026-09-16",
+      "status": "unchanged",
+      "baselineCommit": "b36e0829c6d0140e93cfef2ca599b1b07d4a7797",
+      "latestCommit": "b36e0829c6d0140e93cfef2ca599b1b07d4a7797",
+      "latestCommitDate": "2026-08-12T16:53:21Z"
     }
   },
   {
@@ -523,6 +593,13 @@
       "commitDate": "2026-09-03T16:37:13Z",
       "checkedAt": "2026-09-16",
       "status": "verified"
+    },
+    "recheck": {
+      "checkedAt": "2026-09-16",
+      "status": "unchanged",
+      "baselineCommit": "41bbe19d1a1a7eaab5e7bb9050a417e5c6cffc8f",
+      "latestCommit": "41bbe19d1a1a7eaab5e7bb9050a417e5c6cffc8f",
+      "latestCommitDate": "2026-09-03T16:37:13Z"
     }
   },
   {
@@ -571,6 +648,13 @@
       "commitDate": "2026-04-24T23:05:52Z",
       "checkedAt": "2026-09-16",
       "status": "verified"
+    },
+    "recheck": {
+      "checkedAt": "2026-09-16",
+      "status": "unchanged",
+      "baselineCommit": "c0f6c6ad3f49cbaea3d9053ab850e06b50490aaf",
+      "latestCommit": "c0f6c6ad3f49cbaea3d9053ab850e06b50490aaf",
+      "latestCommitDate": "2026-04-24T23:05:52Z"
     }
   },
   {
@@ -616,6 +700,13 @@
       "commitDate": "2026-08-19T09:56:39Z",
       "checkedAt": "2026-09-16",
       "status": "verified"
+    },
+    "recheck": {
+      "checkedAt": "2026-09-16",
+      "status": "unchanged",
+      "baselineCommit": "321658273cb1d20b76026717d027d505790106d4",
+      "latestCommit": "321658273cb1d20b76026717d027d505790106d4",
+      "latestCommitDate": "2026-08-19T09:56:39Z"
     }
   },
   {
@@ -668,6 +759,13 @@
       "commitDate": "2026-08-24T01:55:39Z",
       "checkedAt": "2026-09-16",
       "status": "verified"
+    },
+    "recheck": {
+      "checkedAt": "2026-09-16",
+      "status": "unchanged",
+      "baselineCommit": "021d9255e543d2f1ab66b87f338d85c3d7a910be",
+      "latestCommit": "021d9255e543d2f1ab66b87f338d85c3d7a910be",
+      "latestCommitDate": "2026-08-24T01:55:39Z"
     }
   },
   {
@@ -716,6 +814,13 @@
       "commitDate": "2026-03-06T20:06:23Z",
       "checkedAt": "2026-09-16",
       "status": "verified"
+    },
+    "recheck": {
+      "checkedAt": "2026-09-16",
+      "status": "unchanged",
+      "baselineCommit": "b0cbd3df1533b396d281a6886d5132f623393a9c",
+      "latestCommit": "b0cbd3df1533b396d281a6886d5132f623393a9c",
+      "latestCommitDate": "2026-03-06T20:06:23Z"
     }
   },
   {
@@ -763,6 +868,13 @@
       "commitDate": "2025-12-01T18:05:36Z",
       "checkedAt": "2026-09-16",
       "status": "verified"
+    },
+    "recheck": {
+      "checkedAt": "2026-09-16",
+      "status": "unchanged",
+      "baselineCommit": "ef740771ac901e03fbca3ce4e1c453a96010f30a",
+      "latestCommit": "ef740771ac901e03fbca3ce4e1c453a96010f30a",
+      "latestCommitDate": "2025-12-01T18:05:36Z"
     }
   }
 ]
