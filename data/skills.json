@@ -44,6 +44,12 @@
       "with": [
         "brainstorming"
       ]
+    },
+    "version": {
+      "commit": "447ca70872026d5b79d6073a546dac082117fed7",
+      "commitDate": "2026-08-15T20:48:40Z",
+      "checkedAt": "2026-09-16",
+      "status": "verified"
     }
   },
   {
@@ -85,6 +91,12 @@
       "before": [
         "prototype"
       ]
+    },
+    "version": {
+      "commit": "b36e0829c6d0140e93cfef2ca599b1b07d4a7797",
+      "commitDate": "2026-08-12T16:53:21Z",
+      "checkedAt": "2026-09-16",
+      "status": "verified"
     }
   },
   {
@@ -127,6 +139,12 @@
         "prototype",
         "diagnosing-bugs"
       ]
+    },
+    "version": {
+      "commit": "805687f34e8c10b420e3d11335a0ca2c3c90d992",
+      "commitDate": "2026-04-14T11:00:18Z",
+      "checkedAt": "2026-09-16",
+      "status": "verified"
     }
   },
   {
@@ -163,6 +181,12 @@
       "before": [
         "impeccable"
       ]
+    },
+    "version": {
+      "commit": null,
+      "commitDate": null,
+      "checkedAt": "2026-09-16",
+      "status": "unavailable"
     }
   },
   {
@@ -213,6 +237,12 @@
       "before": [
         "agent-browser"
       ]
+    },
+    "version": {
+      "commit": "0a4e72a254f3b175c95b36b82e5f2e60fa63f116",
+      "commitDate": "2026-09-15T00:46:19Z",
+      "checkedAt": "2026-09-16",
+      "status": "verified"
     }
   },
   {
@@ -249,6 +279,12 @@
       "before": [
         "agent-browser"
       ]
+    },
+    "version": {
+      "commit": null,
+      "commitDate": null,
+      "checkedAt": "2026-09-16",
+      "status": "unavailable"
     }
   },
   {
@@ -288,6 +324,12 @@
       "before": [
         "skill-creator"
       ]
+    },
+    "version": {
+      "commit": "773fb2c7bbf16781670a3520affc4abd0c6151ae",
+      "commitDate": "2026-07-06T18:36:12Z",
+      "checkedAt": "2026-09-16",
+      "status": "verified"
     }
   },
   {
@@ -332,6 +374,12 @@
       "before": [
         "grill-with-docs"
       ]
+    },
+    "version": {
+      "commit": "fcf0071560d32913c9d4f820e0d7ca467c881619",
+      "commitDate": "2026-08-15T20:46:38Z",
+      "checkedAt": "2026-09-16",
+      "status": "verified"
     }
   },
   {
@@ -374,6 +422,12 @@
       "before": [
         "vercel-react-best-practices"
       ]
+    },
+    "version": {
+      "commit": "321658273cb1d20b76026717d027d505790106d4",
+      "commitDate": "2026-08-19T09:56:39Z",
+      "checkedAt": "2026-09-16",
+      "status": "verified"
     }
   },
   {
@@ -413,6 +467,12 @@
       "with": [
         "vercel-react-best-practices"
       ]
+    },
+    "version": {
+      "commit": "b36e0829c6d0140e93cfef2ca599b1b07d4a7797",
+      "commitDate": "2026-08-12T16:53:21Z",
+      "checkedAt": "2026-09-16",
+      "status": "verified"
     }
   },
   {
@@ -457,6 +517,12 @@
       "before": [
         "impeccable"
       ]
+    },
+    "version": {
+      "commit": "41bbe19d1a1a7eaab5e7bb9050a417e5c6cffc8f",
+      "commitDate": "2026-09-03T16:37:13Z",
+      "checkedAt": "2026-09-16",
+      "status": "verified"
     }
   },
   {
@@ -499,6 +565,12 @@
       "before": [
         "impeccable"
       ]
+    },
+    "version": {
+      "commit": "c0f6c6ad3f49cbaea3d9053ab850e06b50490aaf",
+      "commitDate": "2026-04-24T23:05:52Z",
+      "checkedAt": "2026-09-16",
+      "status": "verified"
     }
   },
   {
@@ -538,6 +610,12 @@
       "before": [
         "agent-browser"
       ]
+    },
+    "version": {
+      "commit": "321658273cb1d20b76026717d027d505790106d4",
+      "commitDate": "2026-08-19T09:56:39Z",
+      "checkedAt": "2026-09-16",
+      "status": "verified"
     }
   },
   {
@@ -584,6 +662,12 @@
         "diagnosing-bugs",
         "impeccable"
       ]
+    },
+    "version": {
+      "commit": "021d9255e543d2f1ab66b87f338d85c3d7a910be",
+      "commitDate": "2026-08-24T01:55:39Z",
+      "checkedAt": "2026-09-16",
+      "status": "verified"
     }
   },
   {
@@ -626,6 +710,12 @@
       "with": [
         "mcp-builder"
       ]
+    },
+    "version": {
+      "commit": "b0cbd3df1533b396d281a6886d5132f623393a9c",
+      "commitDate": "2026-03-06T20:06:23Z",
+      "checkedAt": "2026-09-16",
+      "status": "verified"
     }
   },
   {
@@ -667,6 +757,12 @@
       "with": [
         "skill-creator"
       ]
+    },
+    "version": {
+      "commit": "ef740771ac901e03fbca3ce4e1c453a96010f30a",
+      "commitDate": "2025-12-01T18:05:36Z",
+      "checkedAt": "2026-09-16",
+      "status": "verified"
     }
   }
 ]

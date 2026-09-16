@@ -38,6 +38,36 @@
 
 各 skill 的 `meta` 欄位（frontmatter 欄位、description 字數、body 大小）是 **2026-09-16 實際抓取各來源 repo 的 `SKILL.md` 量測**得出，不是估的。
 
+## 🔖 版本追蹤
+
+每張卡片的來源連結下面會多一行，例如：
+
+```
+✓ 447ca70 上游最後修改 2026-08-15 · 2026-09-16 驗證
+```
+
+`447ca70` 不是 repo 的 HEAD，是這個 skill 對應的 `SKILL.md` **那個路徑本身**最後一次被修改時的 commit —— repo 裡其他檔案異動不會讓這裡跳動，只有真的動到這份 `SKILL.md` 才算。
+
+三種狀態：
+
+| 狀態 | 意思 |
+|---|---|
+| `verified` | 有拿到 GitHub API 回傳的 commit，卡片顯示 commit + 兩個日期 |
+| `unavailable` | 沒有公開來源可查（`ui-ux-pro-max` 自建、`seo-audit` 來源在 skills.sh），卡片上**不會**顯示版本列，不假裝有 |
+| `error` | 查過但這次 API 失敗（網路 / rate limit / repo 改名），沿用上次記錄的 commit 並標黃色警告，不會裝作沒事 |
+
+重新查一次所有版本：
+
+```bash
+bun run check:versions
+# 或
+node scripts/check-versions.js
+```
+
+跑完會直接改寫 `data/skills.json` 的 `version` 欄位，記得跟著跑一次 `bun run build:showcase`。這支腳本走的是 GitHub 公開 API（未認證，60 次 / 小時），16 個 skill 遠低於限制；要提高額度可設 `GITHUB_TOKEN` 環境變數。
+
+這是「拿記錄的版本跟最新版本比對、標出誰改過」的資料基礎，比對邏輯本身還沒做——目前只負責誠實地記錄「現在查到的是什麼」。
+
 ## 📦 Skill 清單
 
 ### Core 6
@@ -179,6 +209,7 @@ build 腳本會先驗證資料完整性——`stage` 一定要存在於 `stages.
 data/*.json                        # Skill registry 資料來源（唯一手動編輯的地方）
 scripts/showcase.template.html     # 版面 / CSS / 互動邏輯 + 一個資料注入標記
 scripts/build-showcase.js          # 組出 public/showcase.html，內含資料驗證
+scripts/check-versions.js          # 查 GitHub 上每個 skill 的最新 commit，寫回 data/skills.json
 public/showcase.html               # 交付檔（build 產物，單檔零依賴，不要手改）
 index.html                         # GitHub Pages 首頁：轉址到 public/showcase.html
 src/app/page.tsx                   # Next.js 外殼：全螢幕 iframe 載入 showcase.html
