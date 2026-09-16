@@ -308,3 +308,21 @@ Stage Summary:
   scripts/showcase.template.html 前端渲染 + build-showcase.js 兩條新驗證規則）。
 - 過程中抓到並修掉一個真實的 CSS 選擇器過寬 bug（圖例圖示被吃到主圖尺寸規則），以及自己測試
   腳本裡的一個誤判（fill vs color），兩者都在合併前修正、重新驗證通過。
+
+---
+Task ID: 9
+Agent: Claude Sonnet 5 (Claude Code)
+Task: GitHub repo 改名 Six-Skills-Dashboard → agent-skills-dashboard，同步所有引用該名稱的資料與設定。
+
+Work Log:
+- `git remote set-url origin` 指向新網址 `https://github.com/rita112025-cpu/agent-skills-dashboard.git`。
+- 改動來源檔：`CLAUDE.md`（issue tracker 說明）、`README.md`（GitHub Pages 連結）、`index.html`
+  （`<title>`）、`scripts/showcase.template.html`（plugin manifest 的 `author.name`）。
+- `public/showcase.html` 是 build 產物，不手改——重跑 `node scripts/build-showcase.js` 讓新名稱
+  透過既有 pipeline 產生，驗證產物裡舊名稱已完全消失。
+- 刻意不動：這份 worklog 的既有歷史條目（Task 3 的 Downloads 本機路徑、Task 3 Stage Summary
+  的 Pages 連結）——那些是記錄當下實際發生的事，事後改名不代表要竄改歷史紀錄。
+
+Stage Summary:
+- 所有「目前指向哪個 repo」的資料來源（git remote、CLAUDE.md、README、頁面 title、plugin
+  manifest）已全部同步到新 repo 名稱；歷史 worklog 記錄維持原樣。
