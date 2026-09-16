@@ -7,6 +7,7 @@
   "評分可匯出 / 匯入 JSON，換裝置不會消失",
   "每個 skill 的版本（commit）皆為實際查詢結果；無公開來源的一律標「未追蹤」而非假造",
   "GitHub 自動重檢只比對、不覆寫基準版本；重檢結果與基準矛盾（unchanged 卻 commit 不同等）會在 build 時被擋下",
+  "依賴關係圖的邊全部從 relations 資料推導，沒有手畫的連線；外部相依（deps）不假裝是 registry 節點，另外列清單",
   "最小字級 16px，內文 23px；暗亮兩版對比皆達 WCAG AA",
   "Plugin ZIP 內含 plugin.json 與各 skill 的取得指令，不偽造 SKILL.md 內容"
 ]

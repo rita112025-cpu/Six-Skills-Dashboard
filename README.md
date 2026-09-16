@@ -102,7 +102,38 @@ node scripts/recheck-versions.js
 
 build 腳本會驗證 `recheck` 資料本身不能自相矛盾——例如標成 `unchanged` 但 `latestCommit` 跟 `baselineCommit` 不同，或標成 `changed` 但兩者其實一樣，這種資料錯誤會直接讓 build 失敗，不會生出看起來正常但內容矛盾的頁面。
 
-這是「拿記錄的版本跟最新版本比對、標出誰改過」的完整資料基礎；下一步（P2 ③ dependency graph）會在這份乾淨資料上疊 skill 依賴關係的視覺化。
+這是「拿記錄的版本跟最新版本比對、標出誰改過」的完整資料基礎。
+
+## 🕸️ 依賴關係圖
+
+在工作流程之後、推薦流程之前，有一張 SVG 畫的依賴關係圖：16 個 skill 依工程階段分欄，欄與欄之間用箭頭連起來。手畫的節點座標 + 貝茲曲線，沒有外部圖表函式庫（`public/showcase.html` 仍是零依賴單檔）。
+
+**邊怎麼來的：**
+
+| 邊的樣式 | 資料來源 | 意思 |
+|---|---|---|
+| 實線 + 箭頭 | `relations.after` / `relations.before` | 有先後順序：箭頭起點先用，箭頭終點後用 |
+| 虛線 | `relations.with` | 互補搭配，沒有先後之分 |
+| 節點右上角的小圓點數字 | `deps` | 這個 skill 有幾個「不在 registry 裡」的外部相依（另裝的 CLI、其他 skill） |
+
+`relations.after` 跟 `relations.before` 不要求兩邊互相宣告——只要任一邊寫了，圖上就畫得出邊。例如 `seo-audit` 的 `relations.after` 寫了 `impeccable`，即使 `impeccable` 自己沒有把 `seo-audit` 列進 `relations.before`，這條邊依然會出現（並在 hover `impeccable` 時一起亮起來）。
+
+**互動：**
+
+- 點節點 = 跳到對應卡片，閃一下外框（跟卡片裡的「接在前 / 接在後 / 搭配」按鈕共用同一個 `gotoSkill()`）
+- Hover 節點 = 亮起跟它相連的邊，其他邊淡出，看得出「這個 skill 到底跟誰有關係」
+- 跟上方的搜尋 / 篩選同步——篩掉的 skill，節點也會一併變淡（不用重新畫整張圖，只是淡出）
+
+**外部相依（`deps`）不會被畫成圖節點**——它們不在這個 registry 裡，沒有階段、沒有 Health、沒有相容性資料，硬畫成節點只是假裝有資料。改成圖下方一份純文字清單：
+
+```
+grill-with-docs  需要 → grilling、domain-modeling
+impeccable       需要 → impeccable CLI
+grill-me         需要 → grilling
+agent-browser    需要 → agent-browser CLI (npm)
+```
+
+build 腳本會擋兩種壞資料：`relations` 指向自己（會畫出自我迴圈）、`deps` 裡有空字串或非字串項目。
 
 ## 📦 Skill 清單
 

@@ -444,6 +444,42 @@ try{document.documentElement.setAttribute("data-theme", localStorage.getItem("sk
   .tool-item .rl{font-size:var(--fs-micro);color:var(--text-faint);line-height:1.5;margin-top:.15rem;}
 
   /* ============================================================
+     7b. Dependency graph
+     節點顏色沿用階段色（CSS var 間接參照，跟卡片/流程圖同一套，
+     不需要在主題切換時重繪）。
+     ============================================================ */
+  .depgraph-panel{padding:1.1rem 1.1rem .6rem;overflow-x:auto;}
+  #depGraph{overflow:visible;}
+  #depGraph svg{display:block;min-width:720px;}
+  .dg-col-label{font-family:var(--mono);font-size:var(--fs-micro);fill:var(--text-faint);}
+  .dg-col-empty{font-family:var(--sans);font-size:var(--fs-micro);fill:var(--text-faint);font-style:italic;}
+  .dg-edge{fill:none;stroke:var(--border);stroke-width:1.6;opacity:.55;transition:opacity .15s ease,stroke .15s ease;}
+  .dg-edge.with{stroke-dasharray:3 4;stroke-width:1.4;}
+  .dg-edge[data-dim="true"]{opacity:.08;}
+  .dg-edge[data-lit="true"]{opacity:1;stroke:var(--accent);stroke-width:2.2;}
+  .dg-node{cursor:pointer;}
+  .dg-node circle{fill:var(--bg-card);stroke:var(--node-color,var(--border));stroke-width:2;transition:stroke-width .15s ease,filter .15s ease;}
+  .dg-node text{font-family:var(--mono);font-size:var(--fs-micro);fill:var(--text-dim);pointer-events:none;}
+  .dg-node .emo{font-size:15px;}
+  .dg-node:hover circle,.dg-node[data-lit="true"] circle{stroke-width:3.5;filter:drop-shadow(0 0 4px color-mix(in srgb,var(--node-color,var(--accent)) 65%,transparent));}
+  .dg-node[data-dim="true"]{opacity:.32;}
+  .dg-node[data-dim="true"] text{fill:var(--text-faint);}
+  .dg-dep-badge{fill:var(--amber);}
+  .dg-arrow-fill{fill:var(--accent);opacity:.75;}
+  .dg-dep-badge-text{font-family:var(--mono);font-size:10px;fill:var(--on-amber);font-weight:700;pointer-events:none;}
+
+  .dg-legend{display:flex;flex-wrap:wrap;gap:1.1rem;padding:.8rem 1.1rem 1rem;border-top:1px solid var(--border-soft);}
+  .dg-legend-item{display:flex;align-items:center;gap:.45rem;font-size:var(--fs-micro);color:var(--text-faint);line-height:1.4;}
+  .dg-legend-item svg{flex-shrink:0;overflow:visible;}
+
+  .dg-deps-list{display:flex;flex-direction:column;gap:.4rem;margin-top:1rem;}
+  .dg-deps-row{
+    display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;
+    font-size:var(--fs-micro);color:var(--text-dim);line-height:1.6;
+  }
+  .dg-deps-row .dep-name{font-family:var(--mono);color:var(--amber);font-weight:600;}
+
+  /* ============================================================
      8. 推薦流程
      ============================================================ */
   .flow-picker{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem;}
@@ -691,6 +727,23 @@ try{document.documentElement.setAttribute("data-theme", localStorage.getItem("sk
         <div class="panel flow" id="flow"><!-- JS render --></div>
         <div class="panel tools-box" id="tools"><!-- JS render --></div>
       </div>
+    </section>
+
+    <!-- ========== Dependency graph ========== -->
+    <section id="depgraph">
+      <div class="sec-head">
+        <h2 class="sec-title">依賴關係圖 <span class="sec-en">· Dependency Graph</span></h2>
+        <span class="sec-chip" id="dgChip">—</span>
+      </div>
+      <p class="sec-note">
+        節點依工程階段分欄；箭頭方向 = 執行順序（→ 表示「先用箭頭起點，再用箭頭終點」），虛線 = 互補搭配、沒有先後之分。
+        點節點會跳到對應卡片；跟上方篩選 / 搜尋同步 —— 篩掉的 skill 節點會一併變淡。
+      </p>
+      <div class="panel depgraph-panel">
+        <div id="depGraph"><!-- JS render：整個 SVG --></div>
+        <div class="dg-legend" id="dgLegend"><!-- JS render --></div>
+      </div>
+      <div class="dg-deps-list" id="dgDepsList"><!-- JS render：外部相依（不在 registry 裡的東西） --></div>
     </section>
 
     <!-- ========== Recommended flows ========== -->
@@ -1172,20 +1225,21 @@ function bindCardEvents(){
     });
   });
   grid.querySelectorAll("[data-goto]").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const id = btn.getAttribute("data-goto");
-      query = ""; fTier = "all"; fStage = "all"; fAgent = "all";
-      document.getElementById("q").value = "";
-      renderPills(); applyFilter();
-      const card = document.getElementById("card-" + id);
-      if (card){
-        card.scrollIntoView({ block:"center" });
-        card.style.transition = "box-shadow .25s ease";
-        card.style.boxShadow = "var(--shadow-pop)";
-        setTimeout(() => { card.style.boxShadow = ""; }, 1400);
-      }
-    });
+    btn.addEventListener("click", () => gotoSkill(btn.getAttribute("data-goto")));
   });
+}
+/* 跳到某張卡片並閃一下外框 —— 卡片內的關聯連結、依賴關係圖的節點共用同一套行為 */
+function gotoSkill(id){
+  query = ""; fTier = "all"; fStage = "all"; fAgent = "all";
+  document.getElementById("q").value = "";
+  renderPills(); applyFilter();
+  const card = document.getElementById("card-" + id);
+  if (card){
+    card.scrollIntoView({ block:"center" });
+    card.style.transition = "box-shadow .25s ease";
+    card.style.boxShadow = "var(--shadow-pop)";
+    setTimeout(() => { card.style.boxShadow = ""; }, 1400);
+  }
 }
 function previewStars(group, n){
   group.querySelectorAll(".star").forEach(b => b.setAttribute("data-on", (+b.getAttribute("data-n")) <= n ? "true" : "false"));
@@ -1242,6 +1296,7 @@ function applyFilter(){
   document.getElementById("emptyMsg").innerHTML =
     fStage === "rated" && !query ? "還沒有已評分的 skill — <b>點星星試試</b>"
     : query ? `找不到符合「<b>${esc(query)}</b>」的 skill` : "沒有符合條件的 skill";
+  syncGraphFilter();
 }
 function bindSearch(){
   const input = document.getElementById("q");
@@ -1287,6 +1342,211 @@ function renderWorkflow(){
       <span class="e" aria-hidden="true">${s.emoji}</span>
       <div><div class="nm">${esc(s.name)}</div><div class="rl">${esc(s.desc[0])}</div></div>
     </div>`).join("");
+}
+
+/* ============================================================
+   依賴關係圖
+   ------------------------------------------------------------
+   節點：16 個 skill，依 STAGES 順序分欄（跟流程圖同一個順序）。
+   邊：
+     directed（實線 + 箭頭）—— 從 relations.after / relations.before 推導。
+       s.after = [X]  → X 是 s 的前置：邊 X → s
+       s.before = [X] → X 是 s 的後續：邊 s → X
+       兩個方向都掃、雙向 union 再去重——只要任一邊聲明了關係就畫得出來，
+       不要求兩邊都互相宣告（資料裡本來就有只單邊宣告的情況）。
+     undirected（虛線、無箭頭）—— 從 relations.with 推導，無先後之分。
+   外部相依（deps 欄位）不是 registry 裡的 skill，不畫成圖節點，
+   改成節點右上角一個小圓點徽章 + title 提示，下方另外列一份完整清單。
+   ============================================================ */
+const DG = { W: 0, H: 0, pos: {}, dirEdges: [], withEdges: [] };
+
+function dgBuildLayout(){
+  const stageKeys = Object.keys(STAGES);
+  const colW = 172, rowH = 56, topPad = 46, leftPad = 26, bottomPad = 22;
+  const cols = stageKeys.map(k => SKILLS.filter(s => s.stage === k));
+  const maxRows = Math.max(1, ...cols.map(c => c.length));
+
+  DG.pos = {};
+  DG.stageKeys = stageKeys;
+  DG.cols = cols;
+  DG.colW = colW; DG.rowH = rowH; DG.topPad = topPad;
+
+  stageKeys.forEach((k, ci) => {
+    const list = cols[ci];
+    const cx = leftPad + ci * colW + colW / 2;
+    list.forEach((s, ri) => {
+      const rowsInCol = list.length;
+      const blockH = maxRows * rowH;
+      const startY = topPad + (blockH - rowsInCol * rowH) / 2 + rowH / 2;
+      DG.pos[s.id] = { x: cx, y: startY + ri * rowH, col: ci };
+    });
+  });
+
+  DG.W = leftPad * 2 + stageKeys.length * colW;
+  DG.H = topPad + maxRows * rowH + bottomPad;
+}
+
+function dgBuildEdges(){
+  const dir = new Map();   // key "from>to" -> {from,to}
+  const wit = new Map();   // key "a|b" (sorted) -> {a,b}
+
+  SKILLS.forEach(s => {
+    (s.relations && s.relations.after || []).forEach(pred => {
+      if (!byId(pred)) return;
+      const key = `${pred}>${s.id}`;
+      if (!dir.has(key)) dir.set(key, { from: pred, to: s.id });
+    });
+    (s.relations && s.relations.before || []).forEach(succ => {
+      if (!byId(succ)) return;
+      const key = `${s.id}>${succ}`;
+      if (!dir.has(key)) dir.set(key, { from: s.id, to: succ });
+    });
+    (s.relations && s.relations.with || []).forEach(other => {
+      if (!byId(other)) return;
+      const key = [s.id, other].sort().join("|");
+      if (!wit.has(key)) wit.set(key, { a: s.id, b: other });
+    });
+  });
+
+  DG.dirEdges = [...dir.values()];
+  DG.withEdges = [...wit.values()];
+}
+
+/* S 型貝茲曲線：同欄（垂直）也保證有水平鼓出，避免同欄多條邊疊在一起 */
+function dgEdgePath(sx, sy, tx, ty){
+  const dx = tx - sx, dy = ty - sy;
+  const bulge = Math.max(40, Math.abs(dx) * 0.45, Math.abs(dy) * 0.22);
+  return `M ${sx.toFixed(1)} ${sy.toFixed(1)} C ${(sx+bulge).toFixed(1)} ${sy.toFixed(1)}, ${(tx-bulge).toFixed(1)} ${ty.toFixed(1)}, ${tx.toFixed(1)} ${ty.toFixed(1)}`;
+}
+
+function dgNodeSVG(s){
+  const p = DG.pos[s.id];
+  const color = (STAGES[s.stage] || {}).color || "var(--border)";
+  const r = 9;
+  const label = esc(s.name.length > 15 ? s.name.slice(0, 14) + "…" : s.name);
+  const depBadge = (s.deps && s.deps.length)
+    ? `<circle class="dg-dep-badge" cx="${p.x + r - 1}" cy="${p.y - r + 1}" r="6.5"></circle>
+       <text class="dg-dep-badge-text" x="${p.x + r - 1}" y="${p.y - r + 4}" text-anchor="middle">${s.deps.length}</text>`
+    : "";
+  const depTitle = (s.deps && s.deps.length) ? `外部相依：${esc(s.deps.join(" / "))}` : "";
+  return `<g class="dg-node" data-node-id="${esc(s.id)}" style="--node-color:${color}" tabindex="0" role="button" aria-label="跳到 ${esc(s.name)}">
+    <title>${esc(s.name)}（${esc(s.stage)}）${depTitle ? " — " + depTitle : ""}</title>
+    <circle cx="${p.x}" cy="${p.y}" r="${r}"></circle>
+    <text x="${p.x + r + 6}" y="${p.y + 4}">${label}</text>
+    ${depBadge}
+  </g>`;
+}
+
+function renderDependencyGraph(){
+  dgBuildLayout();
+  dgBuildEdges();
+
+  let cols = "";
+  DG.stageKeys.forEach((k, ci) => {
+    const st = STAGES[k];
+    const cx = 26 + ci * DG.colW + DG.colW / 2;
+    const list = DG.cols[ci];
+    cols += `<text class="dg-col-label" x="${cx}" y="20" text-anchor="middle">${esc(k)}</text>`;
+    if (!list.length){
+      cols += `<text class="dg-col-empty" x="${cx}" y="${DG.topPad + 8}" text-anchor="middle">（手動，無 skill）</text>`;
+    }
+  });
+
+  const dirPaths = DG.dirEdges.map(e => {
+    const a = DG.pos[e.from], b = DG.pos[e.to];
+    if (!a || !b) return "";
+    const r = 9;
+    const sx = a.x + (b.x >= a.x ? r : -r), sy = a.y;
+    const tx = b.x - (b.x >= a.x ? r : -r), ty = b.y;
+    return `<path class="dg-edge dir" data-from="${esc(e.from)}" data-to="${esc(e.to)}" marker-end="url(#dgArrow)" d="${dgEdgePath(sx, sy, tx, ty)}"></path>`;
+  }).join("");
+
+  const withPaths = DG.withEdges.map(e => {
+    const a = DG.pos[e.a], b = DG.pos[e.b];
+    if (!a || !b) return "";
+    const r = 9;
+    const sx = a.x + (b.x >= a.x ? r : -r), sy = a.y;
+    const tx = b.x - (b.x >= a.x ? r : -r), ty = b.y;
+    return `<path class="dg-edge with" data-from="${esc(e.a)}" data-to="${esc(e.b)}" d="${dgEdgePath(sx, sy, tx, ty)}"></path>`;
+  }).join("");
+
+  const nodes = SKILLS.map(dgNodeSVG).join("");
+
+  document.getElementById("depGraph").innerHTML = `
+    <svg viewBox="0 0 ${DG.W} ${DG.H}" width="${DG.W}" height="${DG.H}" role="img" aria-label="Skill 依賴關係圖">
+      <defs>
+        <marker id="dgArrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path class="dg-arrow-fill" d="M0,0 L10,5 L0,10 z"></path>
+        </marker>
+      </defs>
+      ${cols}
+      ${withPaths}
+      ${dirPaths}
+      ${nodes}
+    </svg>`;
+
+  document.getElementById("dgChip").textContent =
+    `${SKILLS.length} nodes · ${DG.dirEdges.length} 先後 · ${DG.withEdges.length} 搭配`;
+
+  document.getElementById("dgLegend").innerHTML = `
+    <span class="dg-legend-item"><svg width="30" height="10" viewBox="0 0 30 10"><line x1="0" y1="5" x2="21" y2="5" stroke="var(--accent)" stroke-width="2"></line><path class="dg-arrow-fill" d="M20,1.5 L28,5 L20,8.5 z"></path></svg> 先後（箭頭起點先用）</span>
+    <span class="dg-legend-item"><svg width="30" height="10"><line x1="0" y1="5" x2="26" y2="5" stroke="var(--text-faint)" stroke-width="1.6" stroke-dasharray="3 4"></line></svg> 互補搭配，無先後</span>
+    <span class="dg-legend-item"><svg width="16" height="16"><circle cx="8" cy="8" r="6.5" fill="var(--amber)"></circle></svg> 數字 = 外部相依數量</span>
+    <span class="dg-legend-item">點節點跳到對應卡片</span>`;
+
+  renderExternalDeps();
+  bindDependencyGraph();
+  syncGraphFilter();
+}
+
+function renderExternalDeps(){
+  const withDeps = SKILLS.filter(s => s.deps && s.deps.length);
+  const root = document.getElementById("dgDepsList");
+  if (!withDeps.length){ root.innerHTML = ""; return; }
+  root.innerHTML =
+    `<div class="rel" style="margin-bottom:.2rem"><span class="rk">外部相依 · External Dependencies（不在 registry 裡）</span></div>` +
+    withDeps.map(s => `<div class="dg-deps-row">
+      <button class="rel-link" type="button" data-goto="${esc(s.id)}">${esc(s.name)}</button>
+      <span>需要 →</span>
+      ${s.deps.map(d => `<span class="dep-name">${esc(d)}</span>`).join("、")}
+    </div>`).join("");
+  root.querySelectorAll("[data-goto]").forEach(btn => {
+    btn.addEventListener("click", () => gotoSkill(btn.getAttribute("data-goto")));
+  });
+}
+
+function bindDependencyGraph(){
+  const root = document.getElementById("depGraph");
+  root.querySelectorAll(".dg-node").forEach(node => {
+    const id = node.getAttribute("data-node-id");
+    node.addEventListener("click", () => gotoSkill(id));
+    node.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " "){ e.preventDefault(); gotoSkill(id); } });
+    node.addEventListener("mouseenter", () => dgHighlight(id));
+    node.addEventListener("mouseleave", () => dgHighlight(null));
+    node.addEventListener("focus", () => dgHighlight(id));
+    node.addEventListener("blur", () => dgHighlight(null));
+  });
+}
+
+function dgHighlight(id){
+  const root = document.getElementById("depGraph");
+  root.querySelectorAll(".dg-edge").forEach(edge => {
+    if (!id){ edge.removeAttribute("data-dim"); edge.removeAttribute("data-lit"); return; }
+    const touches = edge.getAttribute("data-from") === id || edge.getAttribute("data-to") === id;
+    edge.setAttribute("data-lit", touches ? "true" : "false");
+    edge.setAttribute("data-dim", touches ? "false" : "true");
+  });
+}
+
+/* 跟上方搜尋 / 篩選同步：篩掉的 skill，圖上的節點也一併變淡 */
+function syncGraphFilter(){
+  const root = document.getElementById("depGraph");
+  if (!root) return;
+  root.querySelectorAll(".dg-node").forEach(node => {
+    const id = node.getAttribute("data-node-id");
+    const s = byId(id);
+    node.setAttribute("data-dim", s && !matches(s) ? "true" : "false");
+  });
 }
 
 /* ============================================================
@@ -1652,6 +1912,7 @@ function init(){
   renderPills();
   renderCards();
   renderWorkflow();
+  renderDependencyGraph();
   renderRecipes();
   renderNotRecommended();
   renderChecklist();

@@ -237,3 +237,74 @@ Stage Summary:
 - 「基準要不要更新」仍是人工決定——recheck 只負責誠實揭露落差，不自動同步，避免 registry
   在沒人看過變動內容的情況下悄悄漂移。
 - 只做了 P2 ②，沒有動 P2 ③ dependency graph，也沒有回頭改 P2 ① 的 check-versions.js 邏輯。
+
+---
+Task ID: 8
+Agent: Claude Sonnet 5 (Claude Code)
+Task: P2 ③ Dependency graph —— 把 relations（接在前/接在後/搭配）跟 deps（外部相依）畫成一張可互動的 SVG 依賴關係圖，收尾 P2 三項（version tracking → GitHub 自動重檢 → dependency graph）。
+
+Work Log:
+- 從 main（f84925b，已含 PR #1/#2/#3）開新分支 registry-dependency-graph。
+- 設計上刻意不用任何外部圖表函式庫（D3 之類）——public/showcase.html 的核心賣點就是零依賴單檔，
+  一旦引進 CDN 套件就破功。改成手寫 layout 演算法 + 純 SVG 字串拼接，跟頁面其餘部分同一套
+  「JS 組字串塞進 innerHTML」的既有模式，不新增架構。
+- 分析 relations 資料的方向語意：`s.after=[X]` 代表 X 是 s 的前置（X 先用），`s.before=[X]`
+  代表 X 是 s 的後續（X 後用）。用 impeccable / ui-ux-pro-max / frontend-design / agent-browser
+  的宣告互相核對過語意一致。發現部分邊只有單邊宣告（例如 seo-audit.after=[impeccable]，但
+  impeccable.before 沒有寫回 seo-audit）——決定 union 兩個方向掃出來的邊，只要任一邊宣告了就畫，
+  不要求雙邊互相宣告。
+- 版面：欄位＝ STAGES 順序（跟流程圖同一組 key，含 07-發布 這個 0 skill 的空欄，維持既有「無對應
+  skill（手動執行）」的誠實揭露慣例，不因為圖表就悄悄跳過空欄）；同欄節點置中疊起，跨欄邊用
+  S 型貝茲曲線（水平鼓出量取 dx/dy 的比例值），避免同欄多條邊疊成一條線看不出來。
+- 邊：directed（relations.after/before 推導，實線＋箭頭 marker）、undirected（relations.with
+  推導，虛線無箭頭）。dedupe 用 Map，directed key 是 "from>to"、undirected key 是排序後的
+  "a|b"，兩者互不干擾。
+- 外部相依（deps）刻意不畫成圖節點——它們不在 registry 裡，沒有階段/Health/相容性資料，硬畫
+  等於假裝有資料。改成節點右上角一個小圓點徽章（數字＝相依個數）+ title 提示，圖下方另外列一份
+  純文字「外部相依」清單，同樣可點擊跳卡片。
+- 互動：點節點跳卡片（把原本只給 rel-link 按鈕用的內聯 handler 抽成共用函式 `gotoSkill(id)`，
+  卡片內的「接在前/接在後/搭配」按鈕跟圖上的節點現在共用同一份邏輯，不重複維護兩套）；
+  hover 節點會亮起跟它相連的邊（含只有單邊宣告的那種）、其餘邊淡出；跟上方搜尋/篩選同步——
+  `applyFilter()` 收尾多呼叫一次 `syncGraphFilter()`，被篩掉的 skill 節點一併變淡，不用整張圖重繪。
+- build-showcase.js 加兩條驗證：relations 指向自己（會在圖上畫出自我迴圈）、deps 陣列裡有
+  空字串或非字串項目——兩者都造壞資料測過，正確擋下。
+- data/checklist.json 加一條「依賴關係圖的邊全部從 relations 資料推導，沒有手畫的連線；外部相依
+  不假裝是 registry 節點，另外列清單」。
+
+除錯:
+- 第一版視覺驗證發現圖例（legend）的箭頭圖示被畫得異常巨大，佔掉一大塊版面、把後面的圖例項目
+  推到很遠的地方。追出來是 CSS 選擇器 `.depgraph-panel svg{min-width:720px}` 寫得太寬——
+  它同時吃到主圖的 <svg>（本來就要吃）跟圖例裡三個小型 <svg> 圖示（不該吃到，因為圖例 div
+  跟主圖 div 是同層的兩個子元素，都在 `.depgraph-panel` 底下）。小圖示被強制拉到 720px 寬，
+  沒有 viewBox 的那兩個又用 preserveAspectRatio 等比例拉高，變成又寬又高的巨大圖示。
+  改法：選擇器收斂成 `#depGraph svg`（只吃主圖那個 <svg> 容器），並且把「先後」圖例的箭頭
+  從共用的 `marker-end="url(#dgArrow)"`（尺寸是為粗邊設計的）改成該圖例自己畫一個小三角形，
+  兩個問題一次修掉。
+
+驗證:
+- Node VM + DOM stub（加了一個會快取節點包裝物件的 querySelectorAll(".dg-node") 實作，讓
+  setAttribute 的狀態能在多次呼叫間持續，早期版本因為每次呼叫都重建包裝物件、屬性寫了立刻
+  被丟掉，誤判 syncGraphFilter 沒作用——修掉測試工具本身的問題後才拿到可信結果）：
+    directed/undirected 邊的數量跟直接從 SKILLS.relations 算出的 ground truth 完全一致
+    （11 directed、7 with）；16 個節點、8 個欄位標籤、07-發布 正確顯示空欄；外部相依徽章數量
+    對應 4 個有 deps 的 skill；外部相依清單列數與內容正確（grilling / domain-modeling /
+    impeccable CLI / agent-browser CLI）；搜尋 "browser" 時只有 agent-browser 節點不變淡、
+    清空搜尋後全部恢復。124 項斷言（既有 116 + 這次新增）全過。
+- 2 個造壞資料測試：relations 自我參照、deps 空字串——build 皆正確中止並指名 skill id；
+  復原後重新 build 正常通過。
+- 瀏覽器實測（真實 GitHub 資料，非模擬）：修 legend bug 前後各截圖比對，確認修復生效；
+  水平捲動可看到全部 8 欄，07-發布顯示「（手動，無 skill）」；點擊 agent-browser 節點觸發卡片
+  閃光高亮（jsdom 事件派發直接驗證 boxShadow 被設定）；hover impeccable 節點時，5 條相連的邊
+  （含只有單邊宣告的 seo-audit→impeccable）正確亮起、其餘 13 條邊淡出，mouseleave 後全部
+  恢復；亮/暗兩版對圖表區塊的 38 個文字元素做正確 alpha 合成的對比計算，0 項低於 WCAG AA
+  門檻（過程中先寫出一個有 bug 的量測腳本，誤判 9 處不合格——查證是量測腳本把 HTML `<span>`
+  的預設 `fill:black` 誤判成文字色，跟頁面本身無關，修正量測邏輯後確認 0 項真的不合格）。
+
+Stage Summary:
+- 依賴關係圖以 SVG 呈現 16 個 skill 的先後 / 搭配關係，跟卡片、搜尋、篩選都同步，零外部函式庫。
+- 外部相依（deps）誠實地不混進 registry 節點，另有獨立清單。
+- P2 三項全部完成：① version tracking（基準版本）→ ② GitHub 自動重檢（比對，不覆寫基準）→
+  ③ dependency graph（視覺化 relations/deps，這次沒有新增任何 data/*.json 檔案，純粹是
+  scripts/showcase.template.html 前端渲染 + build-showcase.js 兩條新驗證規則）。
+- 過程中抓到並修掉一個真實的 CSS 選擇器過寬 bug（圖例圖示被吃到主圖尺寸規則），以及自己測試
+  腳本裡的一個誤判（fill vs color），兩者都在合併前修正、重新驗證通過。
