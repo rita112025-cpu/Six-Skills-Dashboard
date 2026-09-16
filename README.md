@@ -66,7 +66,43 @@ node scripts/check-versions.js
 
 跑完會直接改寫 `data/skills.json` 的 `version` 欄位，記得跟著跑一次 `bun run build:showcase`。這支腳本走的是 GitHub 公開 API（未認證，60 次 / 小時），16 個 skill 遠低於限制；要提高額度可設 `GITHUB_TOKEN` 環境變數。
 
-這是「拿記錄的版本跟最新版本比對、標出誰改過」的資料基礎，比對邏輯本身還沒做——目前只負責誠實地記錄「現在查到的是什麼」。
+`version` 是**基準**——釘住之後不會自己變。要知道基準有沒有落後上游，要另外跑重檢。
+
+### GitHub 自動重檢
+
+```bash
+bun run recheck:versions
+# 或
+node scripts/recheck-versions.js
+```
+
+重檢跟設定基準是兩支分開的腳本，故意不共用邏輯：
+
+| | `check:versions` | `recheck:versions` |
+|---|---|---|
+| 做的事 | **設定 / 更新**基準版本 | **比對**基準跟最新版本 |
+| 會改 `version` 欄位 | 會 | **不會** |
+| 寫入欄位 | `version` | `recheck` |
+
+重檢只負責把「有沒有落後」攤開來，**不會自動更新基準**——上游真的改了 `SKILL.md`，不代表要立刻跟著換，中間應該有人看過實際 diff 再決定要不要重新 `check:versions` 釘一個新基準。卡片上會多一行：
+
+```
+⟳ 重檢於 2026-09-16：與基準一致          ← 沒有落後
+⚠ 重檢於 2026-09-16：上游已改到 9f2a1b3（2026-09-17），基準尚未更新   ← 落後了，等你決定
+```
+
+四種 `recheck.status`：
+
+| 狀態 | 意思 |
+|---|---|
+| `unchanged` | 最新 commit 跟基準一樣 |
+| `changed` | 最新 commit 跟基準不一樣，卡片顯示黃色警告 |
+| `unavailable` | 基準本身就是 `unavailable`（沒有公開來源），不打 API，卡片不顯示重檢列 |
+| `error` | 基準是 `error`（沒有可信基準可比），或這次查詢本身失敗；沿用上次資料並標警告 |
+
+build 腳本會驗證 `recheck` 資料本身不能自相矛盾——例如標成 `unchanged` 但 `latestCommit` 跟 `baselineCommit` 不同，或標成 `changed` 但兩者其實一樣，這種資料錯誤會直接讓 build 失敗，不會生出看起來正常但內容矛盾的頁面。
+
+這是「拿記錄的版本跟最新版本比對、標出誰改過」的完整資料基礎；下一步（P2 ③ dependency graph）會在這份乾淨資料上疊 skill 依賴關係的視覺化。
 
 ## 📦 Skill 清單
 
@@ -209,7 +245,8 @@ build 腳本會先驗證資料完整性——`stage` 一定要存在於 `stages.
 data/*.json                        # Skill registry 資料來源（唯一手動編輯的地方）
 scripts/showcase.template.html     # 版面 / CSS / 互動邏輯 + 一個資料注入標記
 scripts/build-showcase.js          # 組出 public/showcase.html，內含資料驗證
-scripts/check-versions.js          # 查 GitHub 上每個 skill 的最新 commit，寫回 data/skills.json
+scripts/check-versions.js          # 設定 / 更新每個 skill 的基準版本（version 欄位）
+scripts/recheck-versions.js        # 拿基準跟最新 commit 比對，寫 recheck 欄位，不動基準
 public/showcase.html               # 交付檔（build 產物，單檔零依賴，不要手改）
 index.html                         # GitHub Pages 首頁：轉址到 public/showcase.html
 src/app/page.tsx                   # Next.js 外殼：全螢幕 iframe 載入 showcase.html

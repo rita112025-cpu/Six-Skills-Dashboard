@@ -65,6 +65,22 @@ function validate(data) {
     if (s.version && s.version.status === "verified" && !/^[0-9a-f]{40}$/.test(s.version.commit || "")) {
       errors.push(`skill "${s.id}" 標成 verified 但 version.commit 不是合法的 40 字元 SHA`);
     }
+
+    const RECHECK_STATUSES = new Set(["unchanged", "changed", "unavailable", "error"]);
+    if (s.recheck) {
+      if (!RECHECK_STATUSES.has(s.recheck.status)) {
+        errors.push(`skill "${s.id}" 的 recheck.status "${s.recheck.status}" 不是合法值（unchanged / changed / unavailable / error）`);
+      }
+      if ((s.recheck.status === "unchanged" || s.recheck.status === "changed") && !/^[0-9a-f]{40}$/.test(s.recheck.latestCommit || "")) {
+        errors.push(`skill "${s.id}" 的 recheck.status 是 "${s.recheck.status}" 但 recheck.latestCommit 不是合法的 40 字元 SHA`);
+      }
+      if (s.recheck.status === "unchanged" && s.recheck.latestCommit !== s.recheck.baselineCommit) {
+        errors.push(`skill "${s.id}" 的 recheck.status 是 "unchanged" 但 latestCommit 跟 baselineCommit 不一樣，資料矛盾`);
+      }
+      if (s.recheck.status === "changed" && s.recheck.latestCommit === s.recheck.baselineCommit) {
+        errors.push(`skill "${s.id}" 的 recheck.status 是 "changed" 但 latestCommit 跟 baselineCommit 一樣，資料矛盾`);
+      }
+    }
   });
   data.RECIPES.forEach(r => {
     r.steps.forEach(id => {

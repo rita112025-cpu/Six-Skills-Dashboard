@@ -1025,8 +1025,26 @@ function versionHTML(s){
     return `<div class="ver warn">⚠ ${esc(v.checkedAt)} 版本查詢失敗，${stale || "尚無歷史紀錄"}</div>`;
   }
   const short = v.commit ? v.commit.slice(0, 7) : "?";
-  const changed = v.commitDate ? esc(v.commitDate.slice(0, 10)) : "?";
-  return `<div class="ver">✓ <code>${esc(short)}</code> 上游最後修改 ${changed} · ${esc(v.checkedAt)} 驗證</div>`;
+  const modified = v.commitDate ? esc(v.commitDate.slice(0, 10)) : "?";
+  return `<div class="ver">✓ <code>${esc(short)}</code> 上游最後修改 ${modified} · ${esc(v.checkedAt)} 驗證</div>`;
+}
+
+/* ---------- GitHub 自動重檢 ----------
+   recheck 由 scripts/recheck-versions.js 寫入，只負責「跟基準版本比對」，
+   不會反過來改動 version（基準要不要跟進，是人看過再決定的事）。
+   沒有 recheck 欄位（還沒跑過 recheck）就什麼都不顯示，不假裝有結果。 */
+function recheckHTML(s){
+  const r = s.recheck;
+  if (!r || r.status === "unavailable") return "";
+  if (r.status === "error"){
+    return `<div class="ver warn">⚠ 重檢於 ${esc(r.checkedAt)} 失敗，目前只看得到基準版本</div>`;
+  }
+  if (r.status === "changed"){
+    const short = r.latestCommit ? r.latestCommit.slice(0, 7) : "?";
+    const date = r.latestCommitDate ? esc(r.latestCommitDate.slice(0, 10)) : "?";
+    return `<div class="ver warn">⚠ 重檢於 ${esc(r.checkedAt)}：上游已改到 <code>${esc(short)}</code>（${date}），基準尚未更新</div>`;
+  }
+  return `<div class="ver">⟳ 重檢於 ${esc(r.checkedAt)}：與基準一致</div>`;
 }
 
 function cardHTML(s){
@@ -1039,6 +1057,7 @@ function cardHTML(s){
     ? `<a class="src" href="${esc(s.source)}" target="_blank" rel="noopener noreferrer">${esc(s.source.replace(/^https?:\/\//,""))}${s.repoPath ? " / " + esc(s.repoPath) : ""} ↗</a>`
     : `<span class="src">— 自建 / 無公開來源</span>`;
   const verHTML = versionHTML(s);
+  const recheckHTMLStr = recheckHTML(s);
 
   const badges = [
     s.tier === "core" ? `<span class="mini-badge core">CORE</span>` : "",
@@ -1078,6 +1097,7 @@ function cardHTML(s){
         <div class="name">${esc(s.name)}${badges ? `<span class="badges">${badges}</span>` : ""}</div>
         ${srcHTML}
         ${verHTML}
+        ${recheckHTMLStr}
       </div>
       <span class="stage-tag">${esc(s.stage)}</span>
     </div>
@@ -1382,7 +1402,7 @@ function buildPluginFiles(){
       id:s.id, name:s.name, tier:s.tier, stage:s.stage, dir:s.dir,
       source:s.source, repoPath:s.repoPath, raw:rawURL(s),
       deps:s.deps, mcp:s.mcp, agents:s.agents, meta:s.meta,
-      relations:s.relations, health:health(s), version:s.version || null
+      relations:s.relations, health:health(s), version:s.version || null, recheck:s.recheck || null
     }))
   };
 
@@ -1443,14 +1463,19 @@ function buildPluginFiles(){
     "",
     "## Skill 清單",
     "",
-    "| Skill | Tier | Stage | Health | Claude Code | ZCode | Commit | 來源 |",
-    "|---|---|---|---|---|---|---|---|"
+    "| Skill | Tier | Stage | Health | Claude Code | ZCode | Commit | Recheck | 來源 |",
+    "|---|---|---|---|---|---|---|---|---|"
   ].concat(SKILLS.map(s => {
     const h = health(s);
     const v = s.version;
+    const r = s.recheck;
     const commitCell = !v || v.status === "unavailable" ? "—"
       : v.commit ? `\`${v.commit.slice(0,7)}\`（${v.checkedAt}）` : "查詢失敗";
-    return `| ${s.name} | ${s.tier} | ${s.stage} | ${h.score}/10 | ${MARK[s.agents["claude-code"]]} | ${MARK[s.agents.zcode]} | ${commitCell} | ${s.source ? s.repoPath ? `${s.source}/blob/HEAD/${s.repoPath}` : s.source : "自建"} |`;
+    const recheckCell = !r || r.status === "unavailable" ? "—"
+      : r.status === "changed" ? `⚠ changed（${r.checkedAt}）`
+      : r.status === "error" ? `✗ error（${r.checkedAt}）`
+      : `✓ unchanged（${r.checkedAt}）`;
+    return `| ${s.name} | ${s.tier} | ${s.stage} | ${h.score}/10 | ${MARK[s.agents["claude-code"]]} | ${MARK[s.agents.zcode]} | ${commitCell} | ${recheckCell} | ${s.source ? s.repoPath ? `${s.source}/blob/HEAD/${s.repoPath}` : s.source : "自建"} |`;
   })).concat([
     "",
     "## ZCode 限制（官方）",

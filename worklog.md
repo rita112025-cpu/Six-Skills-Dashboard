@@ -184,3 +184,56 @@ Stage Summary:
 - scripts/check-versions.js 可重複執行、可單獨排程，不影響一般 dev/build 流程。
 - 只做了 version tracking，沒有動 registry-upgrade 已合併的範圍，也沒有先做 GitHub 自動重檢或
   dependency graph（照使用者指定順序：① version tracking → ② GitHub 重檢 → ③ dependency graph）。
+
+---
+Task ID: 7
+Agent: Claude Sonnet 5 (Claude Code)
+Task: P2 ② GitHub 自動重檢 —— 拿 P2 ① 記錄的基準 commit 跟 GitHub 上最新的 commit 比對，標出 changed / unchanged / unavailable，不偷做 P2 ③ dependency graph。
+
+Work Log:
+- 從 main（39d7b23，已含 PR #1 + #2）開新分支 registry-github-recheck。
+- 設計上刻意把「設定基準」跟「比對基準」拆成兩支獨立腳本，不共用同一支腳本、不讓其中一支順手做另一件事：
+    check-versions.js（既有）—— 寫 version 欄位，代表「目前信任的基準」
+    recheck-versions.js（新）—— 只讀 version 當基準，查最新 commit 比對，寫 recheck 欄位，
+      絕對不改 version。理由：上游真的動了 SKILL.md 不代表 registry 要立刻跟著換，
+      要不要換是人看過 diff 再決定的事，recheck 只負責誠實攤開「有沒有落後」。
+- recheck.status 四態：unchanged（比對一致）、changed（不一致，帶最新 commit 與日期）、
+  unavailable（基準本身沒有公開來源，直接跳過不打 API）、error（基準不可信或這次查詢失敗，
+  保留上次資料不清空）。
+- 跑 recheck-versions.js 打真實 GitHub API：14 unchanged、0 changed、2 unavailable、0 error
+  —— 合理，因為基準才剛在上一輪設定，上游不可能這麼快就有新 commit。
+- 為了證明「changed」判斷邏輯真的會動，手動把 grill-with-docs 的基準 commit 改成假的 40 字元
+  SHA，重跑 recheck，正確判定為 changed 並印出「0000000 → 447ca70」；驗證完立刻用備份還原，
+  重跑一次確認恢復成 14 unchanged / 0 changed 的乾淨狀態。
+- build-showcase.js 的 validate() 加四條新規則：recheck.status 合法值、status 為
+  unchanged/changed 時 latestCommit 必須是合法 40 字元 SHA、unchanged 但
+  latestCommit≠baselineCommit 視為資料矛盾、changed 但 latestCommit=baselineCommit 同樣視為
+  矛盾——四條規則各自造壞資料測過，全部被擋下且錯誤訊息點名哪個 skill、哪個欄位。
+- showcase.template.html 加 recheckHTML()：unchanged 顯示低調的「⟳ 重檢於 X：與基準一致」、
+  changed 顯示黃色警告帶新 commit、error 顯示黃色警告說明查詢失敗、unavailable 完全不顯示
+  （跟 version / Health 的「不假裝有資料」同一套原則）；沒有 recheck 欄位（還沒跑過）一樣什麼都
+  不顯示。registry.json 匯出、plugin README 匯出表格都加上 recheck 欄位/Recheck 欄。
+- data/checklist.json 加一條「重檢只比對不覆寫基準；矛盾資料會被 build 擋下」。
+- package.json 加 recheck:versions script，同樣不掛 predev/prebuild（打外部 API，不該每次
+  dev/build 自動觸發）。
+- README 新增「GitHub 自動重檢」小節：說明 check:versions 與 recheck:versions 的分工表格、
+  四種 recheck.status、build 端矛盾偵測的具體規則。
+
+驗證:
+- 4 個造壞資料的獨立測試：recheck.status 打錯字、unchanged 但 commit 不同、changed 但 commit
+  相同、unchanged 但 latestCommit 格式不合法——build 皆正確中止並指名 skill id、欄位、原因；
+  全部復原後重新 build 正常通過。
+- DOM stub 斷言：既有 116 項（P0/P1）+ 之前 P2 ① 的版本相關斷言，加上這次新增的 recheck 專屬
+  斷言（16 筆都有 recheck 欄位、14 unchanged/2 unavailable/0 changed/0 error、unchanged 的
+  latestCommit 確實等於 baselineCommit 與 version.commit、卡片正確渲染「與基準一致」、
+  ui-ux-pro-max 卡片完全沒有「重檢」字樣、registry.json 與匯出 README 都帶 recheck 資料）
+  —— 總計 138 項全過。
+- 瀏覽器實測 build 產物：grill-with-docs 卡片同時看到 version 行與 recheck 行（用 querySelectorAll
+  直接取兩個 .ver 元素文字內容核對）；ui-ux-pro-max、seo-audit 兩張卡確認完全沒有 .ver 元素。
+
+Stage Summary:
+- data/skills.json 現在每筆都有獨立的 version（基準）與 recheck（比對結果）兩個欄位，職責分離、
+  互不覆寫。
+- 「基準要不要更新」仍是人工決定——recheck 只負責誠實揭露落差，不自動同步，避免 registry
+  在沒人看過變動內容的情況下悄悄漂移。
+- 只做了 P2 ②，沒有動 P2 ③ dependency graph，也沒有回頭改 P2 ① 的 check-versions.js 邏輯。
