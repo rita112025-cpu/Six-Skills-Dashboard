@@ -58,6 +58,10 @@ function validate(data) {
     if (!stageKeys.has(s.stage)) errors.push(`skill "${s.id}" 的 stage "${s.stage}" 不存在於 data/stages.json`);
     Object.values(s.relations || {}).flat().forEach(rid => {
       if (!skillIds.has(rid)) errors.push(`skill "${s.id}" 的 relations 指向不存在的 id "${rid}"`);
+      if (rid === s.id) errors.push(`skill "${s.id}" 的 relations 指向自己，依賴關係圖會畫出自我迴圈`);
+    });
+    (s.deps || []).forEach(d => {
+      if (typeof d !== "string" || !d.trim()) errors.push(`skill "${s.id}" 的 deps 有空字串或非字串項目`);
     });
     if (s.version && !VERSION_STATUSES.has(s.version.status)) {
       errors.push(`skill "${s.id}" 的 version.status "${s.version.status}" 不是合法值（verified / unavailable / error）`);
