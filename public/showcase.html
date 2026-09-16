@@ -3,415 +3,595 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>16 個 Skill 總覽 · worklog</title>
-<meta name="description" content="16 個 skill 總覽：6 核心（grill-with-docs / vercel-react-best-practices / brainstorming / impeccable / seo-audit / ui-ux-pro-max）+ 10 堆疊（find-skills / grill-me / frontend-design / agent-browser / prototype / diagnosing-bugs / skill-creator / image-to-code / subagent-driven-development / mcp-builder）— 暗版 / 亮版可切換、互動評分、階段篩選、一鍵複製安裝路徑。" />
+<title>Agent Skills Dashboard · Registry / Workflow / Compatibility</title>
+<meta name="description" content="Agent Skill Registry：16 個 skill 的階段分類、Claude Code / ZCode / Codex 相容性、依 ZCode 官方限制的 Skill Health 檢查、推薦工作流與 ZCode Plugin 匯出。暗亮雙主題、可搜尋、零依賴單檔 HTML。" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet" />
-<!-- 主題預設：在任何 CSS 套用前先定 data-theme，避免閃白/閃黑 -->
 <script>
 try{document.documentElement.setAttribute("data-theme", localStorage.getItem("skills:theme")||"dark");}catch(e){document.documentElement.setAttribute("data-theme","dark");}
 </script>
 <style>
   /* ============================================================
-     設計 token — zinc + violet，暗版 / 亮版雙主題
-     改顏色改這裡就好；階段色 --st-0x 跟著主題走
+     1. 設計 token
+     字級：1.125 模組化級距，內文 23px（比一般網頁大三階）
+     最小可見字級 16px — 任何文字都不得低於此
+     對比：所有前景/背景組合皆 >= WCAG AA 4.5:1（非文字 >= 3:1）
      ============================================================ */
   :root{
     --sans:"Inter","Noto Sans TC",-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang TC","Microsoft JhengHei",Roboto,sans-serif;
     --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
     --radius:16px;
+    --nav-h:76px;
+
+    --fs-micro:16px;
+    --fs-small:20px;
+    --fs-body:23px;
+    --fs-lede:26px;
+    --fs-h3:28px;
+    --fs-h2:40px;
+    --fs-h1:clamp(38px,5vw,64px);
+
+    --lh-body:1.68;
+    --lh-small:1.6;
+    --lh-head:1.18;
+
+    --measure:34em;
+    --shell:min(1440px,94vw);
   }
   :root[data-theme="dark"]{
     color-scheme:dark;
     --bg:#08080a;
     --bg-soft:#101013;
-    --bg-card:#121215;
+    --bg-card:#141418;
     --bg-inset:#0c0c0f;
-    --border:#27272a;
-    --border-soft:#1e1e22;
-    --text:#f4f4f5;
-    --text-dim:#d4d4d8;
-    --text-faint:#b4b4be;
-    --accent:#8b5cf6;
-    --accent-strong:#a78bfa;
-    --accent-soft:rgba(139,92,246,.14);
-    --accent-line:rgba(139,92,246,.45);
+    --border:#33333a;
+    --border-soft:#26262c;
+    --text:#f8f8f9;
+    --text-dim:#d8d8de;
+    --text-faint:#b6b6c0;
+    --accent:#a78bfa;
+    --accent-strong:#c4b5fd;
+    --accent-soft:rgba(167,139,250,.16);
+    --accent-line:rgba(167,139,250,.5);
     --amber:#fbbf24;
     --on-amber:#1c1917;
     --green:#4ade80;
-    --red:#f87171;
+    --red:#fb7185;
     --on-c:#0b0b0e;
-    --shadow-card:0 0 0 1px rgba(255,255,255,.03),0 8px 24px -12px rgba(0,0,0,.6);
-    --shadow-pop:0 12px 32px -12px rgba(0,0,0,.7),0 0 0 1px rgba(139,92,246,.28);
+    --star-off:#6b6b78;
+    --shadow-card:0 0 0 1px rgba(255,255,255,.04),0 10px 30px -14px rgba(0,0,0,.65);
+    --shadow-pop:0 14px 38px -14px rgba(0,0,0,.75),0 0 0 1px rgba(167,139,250,.32);
     --st-01:#4ade80;--st-02:#fbbf24;--st-03:#f87171;--st-04:#2dd4bf;
-    --st-05:#a78bfa;--st-06:#fb923c;--st-07:#60a5fa;
+    --st-05:#a78bfa;--st-06:#fb923c;--st-07:#60a5fa;--st-08:#f0abfc;
   }
   :root[data-theme="light"]{
     color-scheme:light;
-    --bg:#fcfcfb;
-    --bg-soft:#f6f6f4;
+    --bg:#fbfbfa;
+    --bg-soft:#f3f3f1;
     --bg-card:#ffffff;
-    --bg-inset:#f4f4f3;
-    --border:#e4e4e7;
-    --border-soft:#ececee;
-    --text:#18181b;
-    --text-dim:#52525b;
-    --text-faint:#8a8a93;
-    --accent:#7c3aed;
-    --accent-strong:#6d28d9;
-    --accent-soft:rgba(124,58,237,.08);
-    --accent-line:rgba(124,58,237,.4);
-    --amber:#d97706;
+    --bg-inset:#f2f2f1;
+    --border:#d8d8dd;
+    --border-soft:#e7e7ea;
+    --text:#131316;
+    --text-dim:#45454e;
+    --text-faint:#5c5c66;
+    --accent:#6d28d9;
+    --accent-strong:#5b21b6;
+    --accent-soft:rgba(109,40,217,.09);
+    --accent-line:rgba(109,40,217,.42);
+    --amber:#a35709;
     --on-amber:#ffffff;
-    --green:#15803d;
-    --red:#dc2626;
+    --green:#116b33;
+    --red:#c31f1f;
     --on-c:#ffffff;
-    --shadow-card:0 1px 2px rgba(0,0,0,.04),0 8px 24px -16px rgba(0,0,0,.12);
-    --shadow-pop:0 12px 32px -16px rgba(124,58,237,.3),0 0 0 1px rgba(124,58,237,.14);
-    --st-01:#15803d;--st-02:#b45309;--st-03:#dc2626;--st-04:#0f766e;
-    --st-05:#6d28d9;--st-06:#c2410c;--st-07:#1d4ed8;
+    --star-off:#87878e;
+    --shadow-card:0 1px 2px rgba(0,0,0,.05),0 10px 30px -18px rgba(0,0,0,.16);
+    --shadow-pop:0 14px 38px -18px rgba(109,40,217,.32),0 0 0 1px rgba(109,40,217,.18);
+    --st-01:#15803d;--st-02:#8f4400;--st-03:#c31f1f;--st-04:#0f766e;
+    --st-05:#6d28d9;--st-06:#b03a08;--st-07:#1d4ed8;--st-08:#a21caf;
   }
 
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
+  html{scroll-padding-top:calc(var(--nav-h) + 16px);scroll-behavior:smooth;}
   body{
-    background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.6;
+    background:var(--bg);color:var(--text);font-family:var(--sans);
+    font-size:var(--fs-body);line-height:var(--lh-body);
     -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
-
   }
+  h1,h2,h3{line-height:var(--lh-head);text-wrap:balance;margin:0;}
   ::selection{background:var(--accent-soft);color:var(--text);}
+  a{color:var(--accent);}
+  :where(button,a,input,summary):focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:6px;}
 
-  /* sticky footer */
   .wrap{min-height:100vh;display:flex;flex-direction:column;}
-  main{flex:1 0 auto;width:min(1120px,92vw);margin:0 auto;padding:1.25rem 0 3rem;}
+  main{flex:1 0 auto;width:var(--shell);margin:0 auto;padding:1.5rem 0 4rem;}
   footer{flex-shrink:0;border-top:1px solid var(--border-soft);background:var(--bg-soft);}
 
   /* ============================================================
-     Topbar — macOS terminal 風格
+     2. Topbar
      ============================================================ */
   .topbar{
-    position:sticky;top:0;z-index:40;
-    background:color-mix(in srgb, var(--bg) 82%, transparent);
-    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+    position:sticky;top:0;z-index:40;min-height:var(--nav-h);
+    background:color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
     border-bottom:1px solid var(--border-soft);
   }
   .topbar .inner{
-    width:min(1120px,92vw);margin:0 auto;padding:.6rem 0;
-    display:flex;align-items:center;justify-content:space-between;gap:1rem;
+    width:var(--shell);margin:0 auto;min-height:var(--nav-h);
+    display:flex;align-items:center;justify-content:space-between;gap:1.25rem;
   }
-  .tb-left{display:flex;align-items:center;gap:.45rem;min-width:0;}
-  .tl{width:11px;height:11px;border-radius:50%;display:inline-block;flex-shrink:0;}
+  .tb-left{display:flex;align-items:center;gap:.5rem;min-width:0;}
+  .tl{width:13px;height:13px;border-radius:50%;display:inline-block;flex-shrink:0;}
   .tl.red{background:#ff5f56;} .tl.yellow{background:#ffbd2e;} .tl.green{background:#27c93f;}
   .tb-title{
-    font-family:var(--mono);font-size:.74rem;color:var(--text-dim);
-    margin-left:.4rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    font-family:var(--mono);font-size:var(--fs-micro);color:var(--text-dim);
+    margin-left:.5rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   }
   .tb-title .dim{color:var(--text-faint);}
-  .tb-right{display:flex;align-items:center;gap:.55rem;flex-shrink:0;}
+  .tb-right{display:flex;align-items:center;gap:.7rem;flex-shrink:0;}
   .tb-chip{
-    font-family:var(--mono);font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;
-    color:var(--text-faint);border:1px solid var(--border);border-radius:999px;
-    padding:.26rem .6rem;background:var(--bg-card);white-space:nowrap;
+    font-family:var(--mono);font-size:var(--fs-micro);letter-spacing:.06em;
+    color:var(--text-dim);border:1px solid var(--border);border-radius:999px;
+    padding:.3rem .8rem;background:var(--bg-card);white-space:nowrap;line-height:1.4;
   }
   .theme-btn{
-    appearance:none;cursor:pointer;background:transparent;border:0;
-    padding:.2rem .1rem;font-family:var(--mono);font-size:.72rem;
-    letter-spacing:.12em;color:var(--text-dim);line-height:1;
-    display:inline-flex;align-items:center;white-space:nowrap;
-
+    appearance:none;cursor:pointer;background:var(--bg-card);border:1px solid var(--border);
+    padding:.42rem .95rem;border-radius:999px;font-family:var(--mono);font-size:var(--fs-micro);
+    letter-spacing:.06em;color:var(--text-dim);line-height:1.4;
+    display:inline-flex;align-items:center;gap:.4rem;white-space:nowrap;
   }
-  .theme-btn:hover{color:var(--accent);}
-  /* 參考站做法：兩個 label 都在 DOM，依主題只顯示「要切換過去」的那個 */
+  .theme-btn:hover{color:var(--accent);border-color:var(--accent);}
   .theme-btn .when-dark,.theme-btn .when-light{display:none;}
   :root[data-theme="dark"] .theme-btn .when-dark{display:inline;}
   :root[data-theme="light"] .theme-btn .when-light{display:inline;}
 
   /* ============================================================
-     Hero
+     3. Hero
      ============================================================ */
   .hero{
-    width:min(1120px,92vw);margin:0 auto;padding:3rem 0 2.1rem;
-    display:grid;gap:2rem;grid-template-columns:1.15fr .85fr;align-items:center;
+    width:var(--shell);margin:0 auto;padding:3.5rem 0 2.5rem;
+    display:grid;gap:2.5rem;grid-template-columns:1.1fr .9fr;align-items:center;
   }
   .micro{
-    font-family:var(--mono);font-size:.66rem;letter-spacing:.18em;
-    text-transform:uppercase;color:var(--accent);margin-bottom:.85rem;
+    font-family:var(--mono);font-size:var(--fs-micro);letter-spacing:.16em;
+    text-transform:uppercase;color:var(--accent);margin-bottom:1rem;line-height:1.4;
   }
-  .hero h1{
-    font-size:clamp(1.85rem,4.6vw,2.5rem);font-weight:800;
-    letter-spacing:-.03em;line-height:1.12;margin:0 0 .75rem;color:var(--text);
-  }
-  .hero .sub{color:var(--text-dim);font-size:.94rem;line-height:1.75;margin:0 0 1.1rem;max-width:40em;}
+  .hero h1{font-size:var(--fs-h1);font-weight:800;letter-spacing:-.03em;margin:0 0 1rem;}
+  .hero .sub{color:var(--text-dim);font-size:var(--fs-lede);line-height:1.62;margin:0 0 1.4rem;max-width:var(--measure);}
   .hero .sub b{color:var(--text);font-weight:600;}
-  .chips{display:flex;flex-wrap:wrap;gap:.45rem;}
+
+  /* 統計條：數字全部由資料推導，HTML 不寫死 */
+  .statbar{display:flex;flex-wrap:wrap;gap:.6rem;margin-bottom:1.3rem;}
+  .stat{
+    border:1px solid var(--border);border-radius:12px;background:var(--bg-card);
+    padding:.55rem .95rem;display:flex;align-items:baseline;gap:.55rem;
+    box-shadow:var(--shadow-card);
+  }
+  .stat .n{font-family:var(--mono);font-size:var(--fs-h3);font-weight:600;color:var(--text);line-height:1.1;}
+  .stat .k{font-family:var(--mono);font-size:var(--fs-micro);color:var(--text-faint);letter-spacing:.06em;text-transform:uppercase;}
+  .chips{display:flex;flex-wrap:wrap;gap:.5rem;}
   .chip{
-    font-family:var(--mono);font-size:.62rem;letter-spacing:.06em;text-transform:uppercase;
+    font-family:var(--mono);font-size:var(--fs-micro);letter-spacing:.04em;
     color:var(--text-faint);border:1px solid var(--border);border-radius:999px;
-    padding:.28rem .65rem;background:var(--bg-soft);white-space:nowrap;
+    padding:.32rem .8rem;background:var(--bg-soft);white-space:nowrap;line-height:1.4;
   }
 
-  /* terminal 視窗（永遠深色，像真的 terminal） */
+  /* terminal（永遠深色，字色針對 #0b0b0e 調過） */
   .term{border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow-card);background:#0b0b0e;}
-  .term-bar{display:flex;align-items:center;gap:.45rem;padding:.55rem .8rem;border-bottom:1px solid #232327;background:#101014;}
-  .term-name{font-family:var(--mono);font-size:.72rem;color:#d4d4d8;margin-left:.3rem;}
-  .term-chip{margin-left:auto;font-family:var(--mono);font-size:.58rem;color:#b4b4be;border:1px solid #2e2e33;border-radius:999px;padding:.12rem .5rem;white-space:nowrap;}
-  .term-body{padding:.85rem 1rem;font-family:var(--mono);font-size:.72rem;line-height:1.95;color:#d4d4d8;}
-  .term-body .dim{color:#b4b4be;}
-  .t-line{display:flex;gap:.6rem;align-items:baseline;}
+  .term-bar{display:flex;align-items:center;gap:.5rem;padding:.7rem 1rem;border-bottom:1px solid #2a2a30;background:#101014;}
+  .term-name{font-family:var(--mono);font-size:var(--fs-micro);color:#e4e4e7;margin-left:.4rem;}
+  .term-chip{margin-left:auto;font-family:var(--mono);font-size:var(--fs-micro);color:#b6b6c0;border:1px solid #3a3a42;border-radius:999px;padding:.16rem .6rem;white-space:nowrap;line-height:1.4;}
+  .term-body{padding:1rem 1.15rem;font-family:var(--mono);font-size:var(--fs-micro);line-height:2.05;color:#e4e4e7;}
+  .term-body .dim{color:#b6b6c0;}
+  .t-line{display:flex;gap:.7rem;align-items:baseline;}
   .t-line .dim{margin-left:auto;text-align:right;}
-  .t-num{display:inline-block;width:1.6em;flex-shrink:0;}
-  .t-stage{display:inline-block;width:3.1em;color:#e4e4e7;flex-shrink:0;}
-  .cursor{display:inline-block;width:.55em;height:1em;vertical-align:-.12em;background:#a78bfa;animation:blink 1.1s steps(1) infinite;}
+  .t-num{display:inline-block;width:2.1em;flex-shrink:0;font-weight:600;}
+  .t-stage{display:inline-block;width:5.6em;color:#f4f4f5;flex-shrink:0;}
+  .cursor{display:inline-block;width:.55em;height:1em;vertical-align:-.12em;background:#c4b5fd;animation:blink 1.1s steps(1) infinite;}
   @keyframes blink{50%{opacity:0}}
-  /* hero terminal 內固定用暗版階段色（terminal 本身永遠深色） */
-  .term-force{--st-01:#4ade80;--st-02:#fbbf24;--st-03:#f87171;--st-04:#2dd4bf;--st-05:#a78bfa;--st-06:#fb923c;--st-07:#60a5fa;}
+  .term-force{--st-01:#4ade80;--st-02:#fbbf24;--st-03:#f87171;--st-04:#2dd4bf;--st-05:#a78bfa;--st-06:#fb923c;--st-07:#60a5fa;--st-08:#f0abfc;}
 
   .grad-line{
-    width:min(1120px,92vw);margin:0 auto;height:1px;border:0;
+    width:var(--shell);margin:0 auto;height:1px;border:0;
     background:linear-gradient(90deg,transparent,var(--accent-line) 30%,var(--accent-line) 70%,transparent);
-    opacity:.45;
+    opacity:.5;
   }
 
   /* ============================================================
-     Sections
+     4. Sections
      ============================================================ */
-  section{margin:2.3rem 0;}
-  .sec-head{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap;margin:0 0 1rem;}
-  .sec-title{font-size:1rem;font-weight:700;margin:0;letter-spacing:-.01em;color:var(--text);}
-  .sec-en{font-family:var(--mono);font-size:.72rem;color:var(--text-faint);font-weight:400;}
+  section{margin:3.2rem 0;}
+  .sec-head{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;margin:0 0 1.35rem;}
+  .sec-title{font-size:var(--fs-h3);font-weight:700;letter-spacing:-.015em;color:var(--text);}
+  .sec-en{font-family:var(--mono);font-size:var(--fs-micro);color:var(--text-faint);font-weight:400;}
   .sec-chip{
-    margin-left:auto;font-family:var(--mono);font-size:.58rem;letter-spacing:.08em;
-    text-transform:uppercase;color:var(--text-faint);border:1px solid var(--border);
-    border-radius:999px;padding:.2rem .55rem;white-space:nowrap;
+    margin-left:auto;font-family:var(--mono);font-size:var(--fs-micro);letter-spacing:.06em;
+    color:var(--text-faint);border:1px solid var(--border);
+    border-radius:999px;padding:.24rem .7rem;white-space:nowrap;line-height:1.4;
   }
+  .sec-note{font-size:var(--fs-small);color:var(--text-faint);line-height:var(--lh-small);margin:-.6rem 0 1.2rem;max-width:var(--measure);}
 
   /* ============================================================
-     Filter pills
+     5. 搜尋 + 篩選
      ============================================================ */
-  .toolbar{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin:0 0 1.1rem;}
-  .pills{display:flex;flex-wrap:wrap;gap:.45rem;}
-  .pill{
-    appearance:none;cursor:pointer;font-family:inherit;font-size:.8rem;
-    color:var(--text-dim);background:var(--bg-card);border:1px solid var(--border);
-    padding:.42rem .8rem;border-radius:999px;
-    display:inline-flex;align-items:center;gap:.4rem;line-height:1;
+  .toolbar{display:flex;flex-direction:column;gap:1rem;margin:0 0 1.5rem;}
+  .search-row{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;}
+  .search{
+    flex:1 1 320px;display:flex;align-items:center;gap:.6rem;min-width:0;
+    background:var(--bg-card);border:1px solid var(--border);border-radius:12px;
+    padding:.5rem .9rem;box-shadow:var(--shadow-card);
   }
-  .pill .dot{width:8px;height:8px;border-radius:50%;background:var(--c,currentColor);flex-shrink:0;}
-  .pill:hover{color:var(--text);border-color:color-mix(in srgb,var(--accent) 45%,var(--border));}
-  .pill[data-stage]:hover{border-color:var(--c);}
-  .pill .cnt{font-family:var(--mono);font-size:.68rem;opacity:.7;}
-  .pill[data-active="true"]{background:var(--text);color:var(--bg);border-color:var(--text);font-weight:600;}
-  .pill[data-active="true"] .cnt{opacity:.85;}
-  :root[data-theme="dark"] .pill .cnt{opacity:1;}
-  .pill[data-active="true"] .dot{background:currentColor;}
-  .pill[data-active="true"][data-filter="rated"]{background:var(--amber);color:var(--on-amber);border-color:transparent;}
-  .pill[data-active="true"][data-stage]{background:var(--c);color:var(--on-c);border-color:transparent;}
-
-  .showing{font-family:var(--mono);font-size:.76rem;color:var(--text-dim);white-space:nowrap;}
+  .search:focus-within{border-color:var(--accent);box-shadow:var(--shadow-pop);}
+  .search .ico{font-size:var(--fs-small);line-height:1;flex-shrink:0;}
+  .search input{
+    flex:1 1 auto;min-width:0;appearance:none;background:transparent;border:0;outline:0;
+    font-family:var(--sans);font-size:var(--fs-small);color:var(--text);line-height:1.6;padding:.15rem 0;
+  }
+  .search input::placeholder{color:var(--text-faint);}
+  .search .clear-x{
+    appearance:none;border:0;background:transparent;cursor:pointer;flex-shrink:0;
+    color:var(--text-faint);font-size:var(--fs-small);line-height:1;padding:.2rem .3rem;border-radius:6px;
+  }
+  .search .clear-x:hover{color:var(--red);}
+  .search .clear-x[hidden]{display:none;}
+  .showing{font-family:var(--mono);font-size:var(--fs-micro);color:var(--text-dim);white-space:nowrap;}
   .showing b{color:var(--text);}
 
+  .pill-group{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;}
+  .pill-label{
+    font-family:var(--mono);font-size:var(--fs-micro);color:var(--text-faint);
+    letter-spacing:.08em;text-transform:uppercase;margin-right:.15rem;white-space:nowrap;
+  }
+  .pill{
+    appearance:none;cursor:pointer;font-family:inherit;font-size:var(--fs-micro);
+    color:var(--text-dim);background:var(--bg-card);border:1px solid var(--border);
+    padding:.42rem .85rem;border-radius:999px;
+    display:inline-flex;align-items:center;gap:.45rem;line-height:1.4;
+  }
+  .pill .dot{width:9px;height:9px;border-radius:50%;background:var(--c,currentColor);flex-shrink:0;}
+  .pill:hover{color:var(--text);border-color:color-mix(in srgb,var(--accent) 50%,var(--border));}
+  .pill[data-stage]:hover{border-color:var(--c);}
+  .pill .cnt{font-family:var(--mono);color:var(--text-faint);}
+  .pill[data-active="true"]{background:var(--text);color:var(--bg);border-color:var(--text);font-weight:600;}
+  .pill[data-active="true"] .cnt{color:var(--bg);}
+  .pill[data-active="true"] .dot{background:currentColor;}
+  .pill[data-active="true"][data-filter="rated"]{background:var(--amber);color:var(--on-amber);border-color:transparent;}
+  .pill[data-active="true"][data-filter="rated"] .cnt{color:var(--on-amber);}
+  .pill[data-active="true"][data-stage]{background:var(--c);color:var(--on-c);border-color:transparent;}
+  .pill[data-active="true"][data-stage] .cnt{color:var(--on-c);}
+
   /* ============================================================
-     Card grid
+     6. Skill card
      ============================================================ */
-  .grid{display:grid;gap:1rem;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));}
+  .grid{display:grid;gap:1.25rem;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));}
   .card{
     background:var(--bg-card);border:1px solid var(--border);
-    border-radius:var(--radius);padding:1.05rem 1.1rem 1.1rem;
-    display:flex;flex-direction:column;gap:.65rem;
+    border-radius:var(--radius);padding:1.35rem 1.4rem 1.25rem;
+    display:flex;flex-direction:column;gap:.85rem;
     position:relative;overflow:hidden;box-shadow:var(--shadow-card);
-    transition:transform .18s ease;
+    transition:transform .18s ease,border-color .18s ease;
   }
   .card::before{
-    content:"";position:absolute;left:0;top:0;bottom:0;width:4px;
+    content:"";position:absolute;left:0;top:0;bottom:0;width:5px;
     background:var(--stage-color, var(--border));
   }
-  .card:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--accent) 40%,var(--border));box-shadow:var(--shadow-pop);}
+  .card:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--accent) 45%,var(--border));box-shadow:var(--shadow-pop);}
   .card[data-hidden="true"]{display:none;}
 
-  .card-head{display:flex;align-items:flex-start;gap:.65rem;}
-  .card .emoji{font-size:1.5rem;line-height:1;flex-shrink:0;}
+  .card-head{display:flex;align-items:flex-start;gap:.8rem;}
+  .card .emoji{font-size:var(--fs-h3);line-height:1.1;flex-shrink:0;}
   .card .titles{flex:1 1 auto;min-width:0;}
   .card .name{
-    font-family:var(--mono);font-size:.88rem;font-weight:600;color:var(--text);
-    word-break:break-all;line-height:1.45;
+    font-family:var(--mono);font-size:var(--fs-small);font-weight:600;color:var(--text);
+    line-height:1.4;overflow-wrap:anywhere;
   }
-  .card .name .mini-badge{
-    display:inline-block;white-space:nowrap;vertical-align:middle;
-    font-family:var(--mono);font-size:.58rem;font-weight:600;letter-spacing:.06em;
-    color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 55%,transparent);
-    background:var(--accent-soft);border-radius:999px;
-    padding:.04rem .42rem;margin-left:.42rem;
+  .badges{display:inline-flex;flex-wrap:wrap;gap:.3rem;margin-left:.4rem;vertical-align:middle;}
+  .mini-badge{
+    display:inline-block;white-space:nowrap;line-height:1.4;
+    font-family:var(--mono);font-size:var(--fs-micro);font-weight:600;letter-spacing:.04em;
+    color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 60%,transparent);
+    background:var(--accent-soft);border-radius:999px;padding:.08rem .5rem;
   }
+  .mini-badge.core{color:var(--st-05);border-color:color-mix(in srgb,var(--st-05) 60%,transparent);background:color-mix(in srgb,var(--st-05) 12%,transparent);}
   .card .src{
-    display:inline-flex;align-items:center;gap:.25rem;
-    font-size:.72rem;color:var(--text-faint);text-decoration:none;margin-top:.15rem;
-
+    display:inline-flex;align-items:center;gap:.3rem;line-height:1.5;
+    font-size:var(--fs-micro);color:var(--text-faint);text-decoration:none;margin-top:.3rem;
+    overflow-wrap:anywhere;
   }
-  .card .src:hover{color:var(--accent);}
-  .card .src .ext{font-size:.8rem;}
+  .card .src:hover{color:var(--accent);text-decoration:underline;}
 
   .stage-tag{
-    align-self:flex-start;font-family:var(--mono);font-size:.64rem;
+    align-self:flex-start;font-family:var(--mono);font-size:var(--fs-micro);
     color:var(--stage-color,var(--text-dim));
-    border:1px solid color-mix(in srgb, var(--stage-color,var(--border)) 45%, transparent);
-    padding:.12rem .5rem;border-radius:999px;line-height:1.4;flex-shrink:0;
-    background:color-mix(in srgb, var(--stage-color, transparent) 10%, transparent);
+    border:1px solid color-mix(in srgb, var(--stage-color,var(--border)) 55%, transparent);
+    padding:.16rem .6rem;border-radius:999px;line-height:1.45;flex-shrink:0;
+    background:color-mix(in srgb, var(--stage-color, transparent) 8%, transparent);
   }
 
-  .reco{font-size:.76rem;color:var(--text-dim);display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;}
-  .reco .stars-inline{color:var(--amber);letter-spacing:1px;}
+  .reco{font-size:var(--fs-micro);color:var(--text-dim);display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;line-height:1.5;}
+  .reco .stars-inline{color:var(--amber);letter-spacing:1.5px;font-size:var(--fs-small);}
   .reco .lvl{color:var(--text);font-weight:600;}
 
-  .desc{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.3rem;}
+  .desc{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.4rem;}
   .desc li{
-    font-size:.8rem;color:var(--text-dim);line-height:1.55;
-    padding-left:1.05rem;position:relative;
+    font-size:var(--fs-small);color:var(--text-dim);line-height:var(--lh-small);
+    padding-left:1.5rem;position:relative;max-width:none;
   }
-  .desc li::before{content:"✅";position:absolute;left:0;top:0;font-size:.72rem;}
+  .desc li::before{content:"✅";position:absolute;left:0;top:.05em;font-size:var(--fs-micro);}
+
+  /* --- 相容性 / Health --- */
+  .card-meta{display:grid;gap:.55rem;grid-template-columns:1fr 1fr;}
+  @media (max-width:520px){ .card-meta{grid-template-columns:1fr;} }
+  .meta-box{
+    background:var(--bg-inset);border:1px solid var(--border-soft);border-radius:11px;
+    padding:.6rem .75rem;min-width:0;
+  }
+  .meta-box h4{
+    margin:0 0 .4rem;font-family:var(--mono);font-size:var(--fs-micro);font-weight:600;
+    letter-spacing:.06em;text-transform:uppercase;color:var(--text-faint);line-height:1.4;
+  }
+  .compat{display:flex;flex-direction:column;gap:.22rem;}
+  .compat-row{
+    display:flex;align-items:center;justify-content:space-between;gap:.5rem;
+    font-family:var(--mono);font-size:var(--fs-micro);line-height:1.55;color:var(--text-dim);
+  }
+  .compat-row .v{font-weight:600;white-space:nowrap;}
+  .v.ok{color:var(--green);} .v.warn{color:var(--amber);} .v.no{color:var(--red);} .v.unk{color:var(--text-faint);}
+
+  .health-score{display:flex;align-items:baseline;gap:.45rem;margin-bottom:.35rem;}
+  .health-score .num{font-family:var(--mono);font-size:var(--fs-small);font-weight:600;color:var(--text);}
+  .health-score .lbl{font-family:var(--mono);font-size:var(--fs-micro);color:var(--text-faint);}
+  .health-bar{height:7px;border-radius:999px;background:var(--border-soft);overflow:hidden;margin-bottom:.45rem;}
+  .health-bar i{display:block;height:100%;border-radius:999px;background:var(--hc,var(--green));}
+  .health-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.2rem;}
+  .health-list li{
+    font-family:var(--mono);font-size:var(--fs-micro);line-height:1.55;color:var(--text-dim);
+    display:flex;gap:.4rem;align-items:flex-start;max-width:none;
+  }
+  .health-list li .m{flex-shrink:0;font-weight:600;}
+  .health-list li.pass .m{color:var(--green);}
+  .health-list li.warn .m{color:var(--amber);}
+  .health-list li.fail .m{color:var(--red);}
+  .health-list li.unk .m{color:var(--text-faint);}
+
+  /* --- 關聯 --- */
+  .rel{display:flex;flex-wrap:wrap;gap:.35rem;align-items:center;font-size:var(--fs-micro);line-height:1.5;}
+  .rel .rk{font-family:var(--mono);color:var(--text-faint);letter-spacing:.05em;text-transform:uppercase;margin-right:.1rem;}
+  .rel-link{
+    appearance:none;cursor:pointer;font-family:var(--mono);font-size:var(--fs-micro);line-height:1.4;
+    color:var(--text-dim);background:var(--bg-inset);border:1px solid var(--border-soft);
+    border-radius:999px;padding:.16rem .6rem;
+  }
+  .rel-link:hover{color:var(--accent);border-color:var(--accent);}
 
   .install{
-    display:flex;align-items:center;gap:.5rem;margin-top:.05rem;
+    display:flex;align-items:flex-start;gap:.6rem;
     background:var(--bg-inset);border:1px solid var(--border-soft);
-    border-radius:10px;padding:.35rem .4rem .35rem .65rem;
-
+    border-radius:11px;padding:.5rem .5rem .5rem .8rem;
   }
   .install .path{
-    font-family:var(--mono);font-size:.72rem;color:var(--text);
-    flex:1 1 auto;overflow-x:auto;white-space:nowrap;scrollbar-width:none;
+    font-family:var(--mono);font-size:var(--fs-micro);color:var(--text);
+    flex:1 1 auto;min-width:0;overflow-wrap:anywhere;line-height:1.55;padding-top:.15rem;
   }
-  .install .path::-webkit-scrollbar{display:none;}
   .install .copy{
     appearance:none;cursor:pointer;background:transparent;border:0;
-    color:var(--text-faint);font-size:.9rem;line-height:1;padding:.3rem;
-    border-radius:6px;flex-shrink:0;
+    color:var(--text-faint);font-size:var(--fs-small);line-height:1;padding:.35rem;
+    border-radius:8px;flex-shrink:0;
   }
   .install .copy:hover{color:var(--accent);background:var(--accent-soft);}
   .install .copy[data-copied="true"]{color:var(--green);}
 
   .rating-row{
-    display:flex;align-items:center;justify-content:space-between;gap:.5rem;
-    margin-top:.05rem;padding-top:.55rem;border-top:1px solid var(--border-soft);
+    display:flex;align-items:center;justify-content:space-between;gap:.6rem;
+    margin-top:auto;padding-top:.7rem;border-top:1px solid var(--border-soft);
   }
-  .stars{display:inline-flex;gap:.18rem;}
+  .stars{display:inline-flex;gap:.22rem;}
   .star{
     appearance:none;background:transparent;border:0;cursor:pointer;
-    font-size:1.1rem;line-height:1;padding:.1rem;
-    color:var(--border);transition:transform .12s ease;
+    font-size:var(--fs-lede);line-height:1;padding:.1rem;
+    color:var(--star-off);transition:transform .12s ease;
   }
-  .star:hover{transform:scale(1.3);}
+  .star:hover{transform:scale(1.25);}
   .star[data-on="true"]{color:var(--amber);}
-  .star:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px;}
-  .rating-meta{font-family:var(--mono);font-size:.68rem;color:var(--text-faint);}
+  .rating-meta{font-family:var(--mono);font-size:var(--fs-micro);color:var(--text-faint);line-height:1.4;}
   .rating-meta b{color:var(--amber);}
 
-  /* empty state */
   .empty{
-    display:none;text-align:center;padding:3rem 1rem;
+    display:none;text-align:center;padding:4rem 1.5rem;
     border:1px dashed var(--border);border-radius:var(--radius);color:var(--text-dim);
+    font-size:var(--fs-small);
   }
   .empty[data-show="true"]{display:block;}
-  .empty .big{font-size:2rem;margin-bottom:.5rem;}
+  .empty .big{font-size:var(--fs-h2);margin-bottom:.6rem;}
 
   /* ============================================================
-     Workflow
+     7. Workflow + Tools（工具已脫離 pipeline）
      ============================================================ */
   .panel{border:1px solid var(--border);border-radius:var(--radius);background:var(--bg-soft);box-shadow:var(--shadow-card);}
-  .flow{padding:.9rem;display:flex;flex-direction:column;gap:.45rem;}
+  .split{display:grid;gap:1.25rem;grid-template-columns:1.35fr .65fr;align-items:start;}
+  .flow{padding:1rem;display:flex;flex-direction:column;gap:.5rem;}
   .step{
-    display:flex;align-items:stretch;gap:.8rem;
-    padding:.7rem .85rem;border-radius:12px;
+    display:flex;align-items:stretch;gap:1rem;
+    padding:.85rem 1rem;border-radius:12px;
     border:1px solid var(--border-soft);background:var(--bg-card);
-    border-left:4px solid var(--step-color,var(--border));
-
+    border-left:5px solid var(--step-color,var(--border));
   }
   .step .num{
-    font-family:var(--mono);font-size:.7rem;color:var(--step-color,var(--text-dim));
-    flex-shrink:0;width:4.6rem;letter-spacing:.02em;padding-top:.18em;
+    font-family:var(--mono);font-size:var(--fs-micro);color:var(--step-color,var(--text-dim));
+    flex-shrink:0;width:7.2rem;letter-spacing:.02em;padding-top:.25em;font-weight:600;
   }
-  .step .body{flex:1 1 auto;font-size:.84rem;color:var(--text-dim);line-height:1.6;}
-  .step .body b{color:var(--text);font-family:var(--mono);font-size:.78rem;font-weight:600;}
-  .arrow-down{display:flex;justify-content:center;color:var(--text-faint);font-size:.85rem;line-height:1;}
+  .step .body{flex:1 1 auto;font-size:var(--fs-small);color:var(--text-dim);line-height:var(--lh-small);max-width:none;}
+  .step .body b{color:var(--text);font-family:var(--mono);font-size:var(--fs-micro);font-weight:600;}
+  .step .body .none{color:var(--text-faint);font-style:italic;}
+  .arrow-down{display:flex;justify-content:center;color:var(--text-faint);font-size:var(--fs-small);line-height:1;}
+
+  .tools-box{padding:1rem;display:flex;flex-direction:column;gap:.5rem;}
+  .tool-item{
+    display:flex;gap:.7rem;align-items:flex-start;
+    border:1px solid var(--border-soft);background:var(--bg-card);
+    border-radius:12px;padding:.75rem .9rem;
+  }
+  .tool-item .e{font-size:var(--fs-lede);line-height:1.1;flex-shrink:0;}
+  .tool-item .nm{font-family:var(--mono);font-size:var(--fs-micro);font-weight:600;color:var(--text);overflow-wrap:anywhere;line-height:1.5;}
+  .tool-item .rl{font-size:var(--fs-micro);color:var(--text-faint);line-height:1.5;margin-top:.15rem;}
 
   /* ============================================================
-     Notes（暫不裝）
+     8. 推薦流程
      ============================================================ */
-  .ni-list{display:grid;gap:.6rem;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));}
-  .ni{
-    display:flex;gap:.7rem;align-items:flex-start;justify-content:space-between;
-    border:1px solid var(--border);border-radius:12px;
-    padding:.75rem .85rem;background:var(--bg-card);box-shadow:var(--shadow-card);
-
-  }
-  .ni .nm{font-family:var(--mono);font-size:.78rem;color:var(--text);font-weight:600;word-break:break-all;}
-  .ni .why{font-size:.76rem;color:var(--text-dim);margin-top:.15rem;line-height:1.5;}
-  .ni-tag{
-    flex-shrink:0;font-family:var(--mono);font-size:.56rem;letter-spacing:.06em;
-    text-transform:uppercase;color:var(--text-faint);border:1px solid var(--border);
-    border-radius:999px;padding:.16rem .5rem;white-space:nowrap;
-  }
-
-  /* ============================================================
-     Install + Checklist（雙欄）
-     ============================================================ */
-  .duo{display:grid;gap:1rem;grid-template-columns:1fr 1fr;align-items:start;}
-  .duo-note{font-size:.74rem;color:var(--text-faint);margin:.6rem .2rem 0;line-height:1.6;}
-  .checklist-box{padding:1rem 1.15rem;}
-  .checklist{list-style:none;margin:0 0 .9rem;padding:0;display:flex;flex-direction:column;gap:.42rem;}
-  .checklist li{font-size:.82rem;color:var(--text-dim);padding-left:1.4rem;position:relative;}
-  .checklist li::before{content:"✅";position:absolute;left:0;top:0;}
-  .checklist li b{color:var(--text);}
-  .clear-btn{
-    appearance:none;cursor:pointer;font-family:var(--mono);font-size:.74rem;
+  .flow-picker{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem;}
+  .flow-btn{
+    appearance:none;cursor:pointer;font-family:inherit;font-size:var(--fs-micro);line-height:1.4;
     color:var(--text-dim);background:var(--bg-card);border:1px solid var(--border);
-    padding:.45rem .85rem;border-radius:999px;
-    display:inline-flex;align-items:center;gap:.4rem;
+    padding:.5rem .95rem;border-radius:999px;display:inline-flex;align-items:center;gap:.45rem;
   }
-  .clear-btn:hover{color:var(--red);border-color:var(--red);}
-  .clear-btn:disabled{opacity:.4;cursor:not-allowed;}
+  .flow-btn:hover{color:var(--text);border-color:var(--accent);}
+  .flow-btn[data-active="true"]{background:var(--accent);color:var(--on-c);border-color:transparent;font-weight:600;}
+  .recipe{padding:1.15rem 1.3rem;}
+  .recipe .rhead{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;margin-bottom:.8rem;}
+  .recipe .rname{font-size:var(--fs-small);font-weight:700;color:var(--text);}
+  .recipe .rwhy{font-size:var(--fs-micro);color:var(--text-faint);line-height:1.5;}
+  .recipe ol{margin:0 0 1rem;padding-left:0;list-style:none;counter-reset:rc;display:flex;flex-direction:column;gap:.4rem;}
+  .recipe ol li{
+    counter-increment:rc;font-size:var(--fs-small);color:var(--text-dim);line-height:var(--lh-small);
+    display:flex;gap:.7rem;align-items:baseline;max-width:none;
+  }
+  .recipe ol li::before{
+    content:counter(rc,decimal-leading-zero);font-family:var(--mono);font-size:var(--fs-micro);
+    color:var(--accent);flex-shrink:0;font-weight:600;
+  }
+  .recipe ol li code{font-family:var(--mono);font-size:var(--fs-micro);color:var(--text);background:var(--bg-inset);border-radius:6px;padding:.08rem .4rem;}
+  .recipe ol li .sg{font-family:var(--mono);font-size:var(--fs-micro);color:var(--text-faint);margin-left:auto;white-space:nowrap;}
 
   /* ============================================================
-     Footer
+     9. Not recommended
+     ============================================================ */
+  .ni-list{display:grid;gap:.85rem;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));}
+  .ni{
+    border:1px solid var(--border);border-radius:13px;
+    padding:.95rem 1.05rem;background:var(--bg-card);box-shadow:var(--shadow-card);
+    display:flex;flex-direction:column;gap:.45rem;
+  }
+  .ni-top{display:flex;gap:.8rem;align-items:flex-start;justify-content:space-between;}
+  .ni .nm{font-family:var(--mono);font-size:var(--fs-micro);color:var(--text);font-weight:600;overflow-wrap:anywhere;line-height:1.5;}
+  .ni .why{font-size:var(--fs-micro);color:var(--text-dim);line-height:1.55;max-width:none;}
+  .ni .alt{font-size:var(--fs-micro);color:var(--text-faint);line-height:1.55;}
+  .ni .alt b{font-family:var(--mono);color:var(--accent);font-weight:600;}
+  .ni-tag{
+    flex-shrink:0;font-family:var(--mono);font-size:var(--fs-micro);letter-spacing:.05em;
+    text-transform:uppercase;color:var(--text-faint);border:1px solid var(--border);
+    border-radius:999px;padding:.18rem .6rem;white-space:nowrap;line-height:1.4;
+  }
+  .ni-tag[data-status="SKIP"]{color:var(--red);border-color:color-mix(in srgb,var(--red) 50%,transparent);}
+  .ni-tag[data-status="LATER"]{color:var(--amber);border-color:color-mix(in srgb,var(--amber) 50%,transparent);}
+  .ni-tag[data-status="OTHER"]{color:var(--st-07);border-color:color-mix(in srgb,var(--st-07) 50%,transparent);}
+
+  /* ============================================================
+     10. Export / Install / Checklist
+     ============================================================ */
+  .duo{display:grid;gap:1.25rem;grid-template-columns:1fr 1fr;align-items:start;}
+  .duo-note{font-size:var(--fs-micro);color:var(--text-faint);margin:.8rem .2rem 0;line-height:1.6;max-width:none;}
+  .box{padding:1.15rem 1.3rem;}
+  .checklist{list-style:none;margin:0 0 1.1rem;padding:0;display:flex;flex-direction:column;gap:.5rem;}
+  .checklist li{font-size:var(--fs-small);color:var(--text-dim);padding-left:1.8rem;position:relative;line-height:var(--lh-small);max-width:none;}
+  .checklist li::before{content:"✅";position:absolute;left:0;top:.05em;font-size:var(--fs-micro);}
+  .checklist li b{color:var(--text);}
+
+  .btn{
+    appearance:none;cursor:pointer;font-family:var(--mono);font-size:var(--fs-micro);line-height:1.4;
+    color:var(--text-dim);background:var(--bg-card);border:1px solid var(--border);
+    padding:.55rem 1rem;border-radius:999px;
+    display:inline-flex;align-items:center;gap:.45rem;
+  }
+  .btn:hover{color:var(--text);border-color:var(--accent);}
+  .btn:disabled{opacity:.45;cursor:not-allowed;}
+  .btn.danger:hover{color:var(--red);border-color:var(--red);}
+  .btn.primary{background:var(--accent);color:var(--on-c);border-color:transparent;font-weight:600;}
+  .btn.primary:hover{background:var(--accent-strong);color:var(--on-c);}
+  .btn-row{display:flex;flex-wrap:wrap;gap:.6rem;}
+
+  .target-list{display:flex;flex-direction:column;gap:.5rem;margin:0 0 1rem;}
+  .target{
+    display:flex;align-items:center;gap:.65rem;cursor:pointer;
+    border:1px solid var(--border-soft);background:var(--bg-card);border-radius:11px;
+    padding:.6rem .8rem;font-size:var(--fs-micro);color:var(--text-dim);line-height:1.5;
+  }
+  .target:hover{border-color:var(--accent);}
+  .target input{width:19px;height:19px;accent-color:var(--accent);flex-shrink:0;cursor:pointer;margin:0;}
+  .target .tn{font-family:var(--mono);font-weight:600;color:var(--text);}
+  .target .td{color:var(--text-faint);margin-left:auto;text-align:right;white-space:nowrap;}
+  .target input:disabled + .tn{color:var(--text-faint);}
+  .target:has(input:disabled){cursor:not-allowed;opacity:.6;}
+
+  /* ============================================================
+     11. Footer + toast
      ============================================================ */
   footer .inner{
-    width:min(1120px,92vw);margin:0 auto;padding:1.1rem 0;
-    display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;
+    width:var(--shell);margin:0 auto;padding:1.5rem 0;
+    display:flex;align-items:center;justify-content:space-between;gap:1.25rem;flex-wrap:wrap;
   }
-  footer .left{font-size:.78rem;color:var(--text-dim);}
+  footer .left{font-size:var(--fs-micro);color:var(--text-dim);line-height:1.6;}
   footer .left b{color:var(--text);}
   .active-chip{
-    font-family:var(--mono);font-size:.62rem;color:var(--green);
-    border:1px solid color-mix(in srgb,var(--green) 45%,transparent);
-    border-radius:999px;padding:.18rem .6rem;white-space:nowrap;
+    font-family:var(--mono);font-size:var(--fs-micro);color:var(--green);line-height:1.4;
+    border:1px solid color-mix(in srgb,var(--green) 55%,transparent);
+    border-radius:999px;padding:.22rem .7rem;white-space:nowrap;
   }
-  footer .right{font-family:var(--mono);font-size:.66rem;color:var(--text-faint);}
+  footer .right{font-family:var(--mono);font-size:var(--fs-micro);color:var(--text-faint);line-height:1.6;}
 
-  /* ============================================================
-     Toast
-     ============================================================ */
   #toast{
-    position:fixed;left:50%;bottom:1.75rem;transform:translateX(-50%) translateY(1rem);
+    position:fixed;left:50%;bottom:2rem;transform:translateX(-50%) translateY(1rem);
     background:var(--bg-card);border:1px solid var(--border);
-    color:var(--text);font-size:.84rem;padding:.6rem 1rem;border-radius:12px;
-    box-shadow:var(--shadow-pop);
+    color:var(--text);font-size:var(--fs-small);padding:.8rem 1.3rem;border-radius:13px;
+    box-shadow:var(--shadow-pop);line-height:1.5;
     opacity:0;pointer-events:none;transition:opacity .2s ease, transform .2s ease;
-    z-index:50;font-family:var(--sans);max-width:90vw;text-align:center;
+    z-index:50;font-family:var(--sans);max-width:min(92vw,40em);text-align:center;
   }
   #toast[data-show="true"]{opacity:1;transform:translateX(-50%) translateY(0);}
-  #toast b{color:var(--accent-strong);}
+  #toast b{color:var(--accent);}
 
-  /* small screens */
-  @media (max-width:860px){
-    .hero{grid-template-columns:1fr;padding:2.2rem 0 1.7rem;}
+  /* ============================================================
+     12. 響應式 — 內文變大後斷點整體上移約 25%
+     ============================================================ */
+  @media (max-width:1100px){
+    .hero{grid-template-columns:1fr;padding:2.6rem 0 2rem;gap:2rem;}
+    .split{grid-template-columns:1fr;}
+    .grid{grid-template-columns:repeat(auto-fill,minmax(360px,1fr));}
   }
-  @media (max-width:640px){
-    main{padding:1rem 0 2.2rem;}
+  @media (max-width:860px){
+    main{padding:1.2rem 0 3rem;}
     .tb-chip{display:none;}
-    .hero h1{font-size:1.55rem;}
     .grid{grid-template-columns:1fr;}
     .duo{grid-template-columns:1fr;}
-    .step .num{width:3.6rem;font-size:.64rem;}
+    .ni-list{grid-template-columns:1fr;}
     .sec-chip{display:none;}
+    .step{flex-direction:column;gap:.4rem;}
+    .step .num{width:auto;padding-top:0;}
+    section{margin:2.4rem 0;}
+  }
+  @media (max-width:520px){
+    :root{--fs-h1:clamp(32px,8vw,40px);--fs-lede:22px;}
+    .search-row{flex-direction:column;align-items:stretch;}
+    .showing{text-align:right;}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation-duration:.001ms !important;transition-duration:.001ms !important;}
+    html{scroll-behavior:auto;}
+  }
+
+  /* 列印：螢幕用 23px，紙上要換成正常的 pt 級距 */
+  @media print{
+    :root{--shell:100%;}
+    body{font-size:12pt;line-height:1.5;background:#fff;color:#000;}
+    .topbar,.toolbar,.rating-row,.btn,.btn-row,.flow-picker,#toast,.target-list{display:none !important;}
+    .hero{grid-template-columns:1fr;padding:0 0 12pt;}
+    .hero h1{font-size:24pt;} .sec-title{font-size:14pt;} .hero .sub{font-size:12pt;}
+    .card,.panel,.ni,.term{break-inside:avoid;box-shadow:none;border:1px solid #999;}
+    .desc li,.step .body,.checklist li{font-size:10pt;}
+    .chip,.stage-tag,.mini-badge,.tb-chip,.sec-chip,.compat-row,.health-list li{font-size:9pt;}
+    .card{page-break-inside:avoid;}
   }
 </style>
 </head>
@@ -422,27 +602,29 @@ try{document.documentElement.setAttribute("data-theme", localStorage.getItem("sk
     <div class="inner">
       <div class="tb-left">
         <span class="tl red"></span><span class="tl yellow"></span><span class="tl green"></span>
-        <span class="tb-title">skill-dashboard<span class="dim"> — showcase.html</span></span>
+        <span class="tb-title">skill-registry<span class="dim"> — showcase.html</span></span>
       </div>
       <div class="tb-right">
-        <span class="tb-chip">16 skills · 7 stages</span>
-        <button id="themeBtn" class="theme-btn" type="button" aria-label="切換暗色 / 亮色主題" title="切換主題"><span class="when-light">暗色</span><span class="when-dark">亮色</span></button>
+        <span class="tb-chip" id="tbChip">—</span>
+        <button id="themeBtn" class="theme-btn" type="button" aria-label="切換暗色 / 亮色主題" title="切換主題"><span class="when-light">☾ 暗色</span><span class="when-dark">☀ 亮色</span></button>
       </div>
     </div>
   </nav>
 
   <header class="hero">
     <div class="hero-left">
-      <div class="micro">Claude Code Skills · 2026</div>
-      <h1>16 個 Skill 總覽</h1>
+      <div class="micro">Agent Skill Registry · 2026</div>
+      <h1>Agent Skills Dashboard</h1>
       <p class="sub">
-        以最小可行組合覆蓋完整開發流程：<b>6 個核心</b> + <b>10 個堆疊</b> skill，從模糊需求到上線驗收，每個 skill 都有明確定位與驗收標準。
-        <b>可點星星評分</b>（存本機）、<b>按階段篩選</b>、<b>一鍵複製安裝路徑</b>，右上角可切換<b>暗版 / 亮版</b>。
+        不只是一份清單，而是可查詢的 <b>Skill Registry</b>：每個 skill 都標註所屬工程階段、
+        <b>Claude Code / ZCode / Codex / OpenClaw 相容性</b>，以及依 ZCode 官方限制實測的 <b>Skill Health</b>。
       </p>
+      <div class="statbar" id="statbar"><!-- JS render：數字全部由資料推導 --></div>
       <div class="chips">
-        <span class="chip">Inter + Noto Sans TC + JetBrains Mono</span>
-        <span class="chip">Violet · Neutral</span>
-        <span class="chip">Dark / Light 可切換</span>
+        <span class="chip">單檔零依賴</span>
+        <span class="chip">Dark / Light</span>
+        <span class="chip">Local-first 評分</span>
+        <span class="chip">ZCode Plugin 匯出</span>
       </div>
     </div>
     <div class="hero-right">
@@ -450,86 +632,139 @@ try{document.documentElement.setAttribute("data-theme", localStorage.getItem("sk
         <div class="term-bar">
           <span class="tl red"></span><span class="tl yellow"></span><span class="tl green"></span>
           <span class="term-name">workflow.pipeline.ts</span>
-          <span class="term-chip">7 stages · linear</span>
+          <span class="term-chip" id="termChip">—</span>
         </div>
-        <div class="term-body">
-          <div class="t-line"><span class="t-num" style="color:var(--st-01)">01</span><span class="t-stage">需求</span><span class="dim">grill-with-docs · find-skills</span></div>
-          <div class="t-line"><span class="t-num" style="color:var(--st-02)">02</span><span class="t-stage">開發</span><span class="dim">vercel-react-best-practices</span></div>
-          <div class="t-line"><span class="t-num" style="color:var(--st-03)">03</span><span class="t-stage">UI</span><span class="dim">frontend-design · impeccable</span></div>
-          <div class="t-line"><span class="t-num" style="color:var(--st-04)">04</span><span class="t-stage">SEO</span><span class="dim">seo-audit</span></div>
-          <div class="t-line"><span class="t-num" style="color:var(--st-05)">05</span><span class="t-stage">驗收</span><span class="dim">agent-browser</span></div>
-          <div class="t-line"><span class="t-num" style="color:var(--st-06)">06</span><span class="t-stage">發布</span><span class="dim">git review · smoke test</span></div>
-          <div class="t-line"><span class="t-num" style="color:var(--st-07)">07</span><span class="t-stage">工具</span><span class="dim">skill-creator · mcp-builder</span></div>
-          <div class="t-line" style="margin-top:.3rem"><span class="dim">$</span><span class="cursor"></span></div>
-        </div>
+        <div class="term-body" id="termBody"><!-- JS render --></div>
       </div>
     </div>
   </header>
   <div class="grad-line"></div>
 
   <main>
-    <section>
+
+    <!-- ========== Skills ========== -->
+    <section id="skills">
       <div class="sec-head">
-        <h2 class="sec-title">快速對照 <span class="sec-en">· Skill Cards</span></h2>
-        <span class="sec-chip">16 cards · hover to highlight</span>
+        <h2 class="sec-title">Skill Registry <span class="sec-en">· Search / Filter / Health</span></h2>
+        <span class="sec-chip" id="cardsChip">—</span>
       </div>
+
       <div class="toolbar">
-        <div class="pills" id="pills"><!-- JS render --></div>
-        <div class="showing">📍 Showing <b id="showN">16</b> of <b id="showTotal">16</b> skills</div>
+        <div class="search-row">
+          <label class="search">
+            <span class="ico" aria-hidden="true">🔎</span>
+            <input id="q" type="search" autocomplete="off" spellcheck="false"
+                   placeholder="搜尋 skill 名稱、階段、說明、來源、Agent…" aria-label="搜尋 skill" />
+            <button class="clear-x" id="qClear" type="button" aria-label="清除搜尋" hidden>✕</button>
+          </label>
+          <div class="showing">📍 Showing <b id="showN">0</b> of <b id="showTotal">0</b> skills</div>
+        </div>
+        <div class="pill-group" id="pillsTier"><span class="pill-label">分類</span></div>
+        <div class="pill-group" id="pillsStage"><span class="pill-label">階段</span></div>
+        <div class="pill-group" id="pillsAgent"><span class="pill-label">Agent</span></div>
       </div>
+
       <div class="grid" id="grid"><!-- JS render --></div>
       <div class="empty" id="empty">
         <div class="big">🚫</div>
-        還沒有已評分的 skill — <b>點星星試試</b>
+        <span id="emptyMsg">沒有符合條件的 skill</span>
       </div>
     </section>
 
-    <section>
+    <!-- ========== Workflow + Tools ========== -->
+    <section id="workflow">
       <div class="sec-head">
-        <h2 class="sec-title">工作流程 <span class="sec-en">· Workflow Pipeline</span></h2>
-        <span class="sec-chip">7 stages · linear</span>
+        <h2 class="sec-title">工程流程 <span class="sec-en">· Engineering Workflow</span></h2>
+        <span class="sec-chip" id="flowChip">—</span>
       </div>
-      <div class="panel flow" id="flow"><!-- JS render --></div>
+      <p class="sec-note">
+        左側是有先後順序的工程階段；右側的開發工具不屬於流程的任何一步，
+        它們是用來「產生新能力」的元工具，因此獨立出來，不再混在 pipeline 裡。
+      </p>
+      <div class="split">
+        <div class="panel flow" id="flow"><!-- JS render --></div>
+        <div class="panel tools-box" id="tools"><!-- JS render --></div>
+      </div>
     </section>
 
-    <section>
+    <!-- ========== Recommended flows ========== -->
+    <section id="recipes">
       <div class="sec-head">
-        <h2 class="sec-title">備忘 <span class="sec-en">· Notes</span></h2>
-        <span class="sec-chip">4 items</span>
+        <h2 class="sec-title">推薦使用順序 <span class="sec-en">· Recommended Flows</span></h2>
+        <span class="sec-chip">copy-ready</span>
+      </div>
+      <div class="flow-picker" id="recipePicker"><!-- JS render --></div>
+      <div class="panel recipe" id="recipeBody"><!-- JS render --></div>
+    </section>
+
+    <!-- ========== Not recommended ========== -->
+    <section id="notes">
+      <div class="sec-head">
+        <h2 class="sec-title">不建議安裝 <span class="sec-en">· Not Recommended</span></h2>
+        <span class="sec-chip" id="niChip">—</span>
       </div>
       <div class="ni-list" id="niList"><!-- JS render --></div>
     </section>
 
-    <section>
+    <!-- ========== Export + Install ========== -->
+    <section id="export">
       <div class="duo">
         <div>
           <div class="sec-head">
-            <h2 class="sec-title">安裝方式 <span class="sec-en">· Install</span></h2>
-            <span class="sec-chip">claude code</span>
+            <h2 class="sec-title">匯出 <span class="sec-en">· Export</span></h2>
+            <span class="sec-chip">zip / json</span>
+          </div>
+          <div class="panel box">
+            <div class="target-list" id="targets"><!-- JS render --></div>
+            <div class="btn-row">
+              <button class="btn primary" id="exportPlugin" type="button">⬇ 下載 Plugin ZIP</button>
+              <button class="btn" id="exportRegistry" type="button">⬇ registry.json</button>
+            </div>
+            <p class="duo-note" id="exportNote"></p>
+          </div>
+          <div class="sec-head" style="margin-top:2rem">
+            <h2 class="sec-title">安裝路徑 <span class="sec-en">· Install</span></h2>
           </div>
           <div class="term">
             <div class="term-bar">
               <span class="tl red"></span><span class="tl yellow"></span><span class="tl green"></span>
               <span class="term-name">install.sh</span>
-              <span class="term-chip">scope: global / project</span>
+              <span class="term-chip">global / project</span>
             </div>
             <div class="term-body">
-              <div class="dim"># 全域安裝 — 對所有專案生效</div>
-              <div>~/.claude/skills/</div>
-              <div class="dim" style="margin-top:.35rem"># 專案內安裝 — 只對當前專案生效</div>
-              <div>.claude/skills/</div>
+              <div class="dim"># Claude Code — 全域 / 專案</div>
+              <div>~/.claude/skills/&lt;name&gt;/SKILL.md</div>
+              <div>.claude/skills/&lt;name&gt;/SKILL.md</div>
+              <div class="dim" style="margin-top:.5rem"># ZCode — 全域，或用 Settings 匯入 Claude Code skills</div>
+              <div>~/.zcode/skills/&lt;name&gt;/SKILL.md</div>
             </div>
           </div>
-          <p class="duo-note">每個 skill 的詳細安裝說明，請參考各自 repo 的 README。建議核心 6 個全域安裝，專案需要時再覆蓋。</p>
         </div>
+
         <div>
           <div class="sec-head">
+            <h2 class="sec-title">評分資料 <span class="sec-en">· Ratings</span></h2>
+            <span class="sec-chip">local-first</span>
+          </div>
+          <div class="panel box">
+            <p class="duo-note" style="margin-top:0">
+              評分只存在這台瀏覽器的 localStorage（<code>skills:ratings</code>），
+              換裝置不會同步。要帶走就匯出 JSON，到新裝置再匯入。
+            </p>
+            <div class="btn-row" style="margin-top:1rem">
+              <button class="btn" id="exportRatings" type="button">⬇ 匯出評分</button>
+              <button class="btn" id="importRatings" type="button">⬆ 匯入評分</button>
+              <button class="btn danger" id="clearBtn" type="button">🧹 清除全部</button>
+            </div>
+            <input type="file" id="importFile" accept="application/json,.json" hidden />
+          </div>
+
+          <div class="sec-head" style="margin-top:2rem">
             <h2 class="sec-title">自我驗證 <span class="sec-en">· Self-check</span></h2>
             <span class="sec-chip">checklist</span>
           </div>
-          <div class="panel checklist-box">
+          <div class="panel box">
             <ul class="checklist" id="checklist"><!-- JS render --></ul>
-            <button class="clear-btn" id="clearBtn">🧹 清除全部評分</button>
           </div>
         </div>
       </div>
@@ -538,377 +773,411 @@ try{document.documentElement.setAttribute("data-theme", localStorage.getItem("sk
 
   <footer>
     <div class="inner">
-      <div class="left">基於 <b>Claude Code</b> · 打造最小可行 Skill 組合 · 2026</div>
-      <span class="active-chip">16 / 16 active</span>
+      <div class="left">Agent Skill Registry · <b>Claude Code</b> / <b>ZCode</b> / Codex / OpenClaw · 2026</div>
+      <span class="active-chip" id="activeChip">—</span>
       <div class="right">skills:ratings · skills:theme · localStorage</div>
     </div>
   </footer>
 </div>
 
-<div id="toast"></div>
-
+<div id="toast" role="status" aria-live="polite"></div>
 <!-- ============================================================
-     維護說明：
-     要加 / 改 skill，只要編輯下方 SKILLS 陣列裡的一個物件即可。
-     篩選 pill、Showing N of N、階段配色、評分、複製路徑全部自動推導。
-     要改階段顏色，改 CSS 裡的 --st-01 ~ --st-07（暗 / 亮各一組）。
-     要改流程圖，改 WORKFLOW。主題切換存 localStorage（skills:theme）。
+     維護說明
+     ------------------------------------------------------------
+     所有內容都是資料，UI 全自動推導，沒有任何寫死的數字或文案：
+       AGENTS    支援的 agent 平台
+       STAGES    工程階段（kind:"pipeline" 進流程圖，kind:"tool" 進工具區）
+       SKILLS    skill registry —— 加 skill 只要加一個物件
+       RECIPES   推薦使用順序
+       NOT_RECOMMENDED / CHECKLIST
+
+     SKILLS 的 meta 欄位是 2026-09-16 實際抓取各來源 repo 的 SKILL.md
+     量測出來的（frontmatter 欄位、description 長度、body 大小）。
+     ZCODE_LIMITS 是官方公告的限制，Health 檢查就是拿 meta 去比對它。
+     沒有量測到的（非 GitHub 來源、自建）一律標 null，UI 顯示「未驗證」，
+     不會假裝通過。
      ============================================================ -->
 <script>
 "use strict";
 
-/* ---------- 1. 階段定義（id → 標籤 + CSS 變數色） ---------- */
+/* ---------- 0. ZCode 官方限制（zcode.z.ai/en/docs/skill） ---------- */
+const ZCODE_LIMITS = {
+  descriptionMax: 1024,   // description 超過 1024 字元 → 整個 skill 被丟棄
+  descriptionWarn: 800,   // 自訂的接近上限警戒線
+  bodyMaxKB: 100          // SKILL.md body 超過 100KB → 載入時被截斷
+};
+/* Claude Code 專屬的 frontmatter 欄位，其他 agent 不一定認得 */
+const CLAUDE_ONLY_KEYS = ["disable-model-invocation","user-invocable","argument-hint","allowed-tools","hidden"];
+const VERIFIED_AT = "2026-09-16";
+
+/* ---------- 1. Agent 平台 ---------- */
+const AGENTS = [
+  { id:"claude-code", label:"Claude Code", dir:"~/.claude/skills" },
+  { id:"zcode",       label:"ZCode",       dir:"~/.zcode/skills"  },
+  { id:"codex",       label:"Codex CLI",   dir:"~/.codex/skills"  },
+  { id:"openclaw",    label:"OpenClaw",    dir:"~/.openclaw/skills" }
+];
+
+/* ---------- 2. 工程階段 ----------
+   kind:"pipeline" → 有先後順序，進流程圖
+   kind:"tool"     → 元工具，不屬於流程任何一步，獨立顯示            */
 const STAGES = {
-  "01-需求": "var(--st-01)",
-  "02-開發": "var(--st-02)",
-  "03-UI":   "var(--st-03)",
-  "04-SEO":  "var(--st-04)",
-  "05-驗收": "var(--st-05)",
-  "06-發布": "var(--st-06)",
-  "07-工具": "var(--st-07)",
+  "01-需求": { en:"Discovery", color:"var(--st-01)", kind:"pipeline", note:"把模糊想法逼成可執行規格" },
+  "02-開發": { en:"Build",     color:"var(--st-02)", kind:"pipeline", note:"套規範、先試錯、拆任務" },
+  "03-UI":   { en:"UI / UX",   color:"var(--st-03)", kind:"pipeline", note:"先設計，再驗收" },
+  "04-SEO":  { en:"SEO",       color:"var(--st-04)", kind:"pipeline", note:"上線前健檢" },
+  "05-測試": { en:"Testing",   color:"var(--st-05)", kind:"pipeline", note:"重現 → 縮小 → 修復驗證" },
+  "06-驗收": { en:"Browser QA",color:"var(--st-06)", kind:"pipeline", note:"真的開瀏覽器點過一遍" },
+  "07-發布": { en:"Release",   color:"var(--st-07)", kind:"pipeline", note:"review → commit → smoke test" },
+  "T-工具":  { en:"Dev Tools", color:"var(--st-08)", kind:"tool",     note:"產生新能力的元工具，不在流程線上" }
 };
 
-/* ---------- 2. 16 個 skill（單一資料來源）：前 6 個核心 + 後 10 個堆疊（badge NEW） ---------- */
-/* 欄位：
-   id        唯一識別（同時是 localStorage key）
-   emoji     卡片圖示
-   name      skill 名稱
-   source    來源 URL（null = 無外部來源）
-   stage     對應 STAGES 的 key
-   stars     建議度（1–5）
-   level     建議度文字
-   tag       評分 toast 用的短標籤
-   badge     選填：名稱旁的小標籤（新進堆疊用 NEW）
-   desc      三行 ✅ 說明
-   path      安裝路徑
+/* ---------- 3. Skill Registry ----------
+   欄位：
+     id / emoji / name       顯示用
+     tier                    "core" | "stack"（Core / Optional 由此推導，不寫死）
+     stage                   對應 STAGES
+     stars / level / tag     使用者主觀建議度（與客觀 Health 分開）
+     desc                    三行說明
+     source                  來源 repo 首頁（null = 自建）
+     repoPath                SKILL.md 在 repo 內的實際路徑（已核對，null = 無法核對）
+     dir                     上游目錄名 → 決定安裝路徑
+     deps                    執行期外部相依（空陣列 = 無）
+     mcp                     是否需要 MCP server
+     agents                  各平台相容性 "ok" | "partial" | "unknown"
+     meta                    2026-09-16 實抓 SKILL.md 的量測值（null = 未驗證）
+     relations               與其他 skill 的關係
 */
 const SKILLS = [
   {
-    id:"grill-with-docs",
-    emoji:"🔥",
-    name:"grill-with-docs",
-    source:"https://github.com/exinfinite/mattpocock-skills",
-    stage:"01-需求",
-    stars:4,
-    level:"必裝",
-    tag:"需求守門員",
+    id:"grill-with-docs", emoji:"🔥", name:"grill-with-docs", tier:"core", stage:"01-需求",
+    stars:4, level:"必裝", tag:"需求守門員",
     desc:[
       "動工前追問需求細節、術語定義、決策理由",
-      "產出 CONTEXT.md 與 ADR，留下決策紀錄",
-      "日後回頭維護有跡可循，適合長期專案"
+      "產出 ADR 與 glossary，留下決策紀錄",
+      "本體只有 3 行：實際上是轉呼叫 grilling + domain-modeling"
     ],
-    path:"~/.claude/skills/grill-with-docs"
+    source:"https://github.com/mattpocock/skills",
+    repoPath:"skills/engineering/grill-with-docs/SKILL.md",
+    dir:"grill-with-docs",
+    deps:["grilling","domain-modeling"], mcp:false,
+    agents:{ "claude-code":"ok", zcode:"partial", codex:"unknown", openclaw:"unknown" },
+    agentNote:"body 是 `Call the Skill tool twice` — 依賴 Claude Code 的 Skill 呼叫機制與另外兩個 skill",
+    meta:{ hasName:true, hasDesc:true, descLen:106, bodyKB:0.1, extraKeys:["disable-model-invocation"] },
+    relations:{ after:["grill-me"], with:["brainstorming"] }
   },
   {
-    id:"brainstorming",
-    emoji:"💡",
-    name:"brainstorming",
-    source:"https://github.com/obra/superpowers",
-    stage:"01-需求",
-    stars:3,
-    level:"視情況",
-    tag:"方向把關",
+    id:"brainstorming", emoji:"💡", name:"brainstorming", tier:"core", stage:"01-需求",
+    stars:3, level:"視情況", tag:"方向把關",
     desc:[
       "強制「先討論方案 → 你批准 → 才實作」流程",
       "新專案啟動、不確定怎麼做的功能時用",
-      "注意：不要讓它接管所有任務，小修小改跳過"
+      "小修小改跳過，不要讓它接管所有任務"
     ],
-    path:"~/.claude/skills/brainstorming"
+    source:"https://github.com/obra/superpowers",
+    repoPath:"skills/brainstorming/SKILL.md",
+    dir:"brainstorming",
+    deps:[], mcp:false,
+    agents:{ "claude-code":"ok", zcode:"ok", codex:"unknown", openclaw:"unknown" },
+    meta:{ hasName:true, hasDesc:true, descLen:198, bodyKB:14.9, extraKeys:[] },
+    relations:{ with:["grill-with-docs"], before:["prototype"] }
   },
   {
-    id:"vercel-react-best-practices",
-    emoji:"⚡",
-    name:"vercel-react-best-practices",
-    source:"https://github.com/vercel-labs/agent-skills",
-    stage:"02-開發",
-    stars:5,
-    level:"高頻使用",
-    tag:"高頻出場",
+    id:"vercel-react-best-practices", emoji:"⚡", name:"vercel-react-best-practices", tier:"core", stage:"02-開發",
+    stars:5, level:"高頻使用", tag:"高頻出場",
     desc:[
       "Vercel 官方 React / Next.js 效能與最佳實踐",
-      "40+ 條規則，AI 寫 code 時直接套用",
-      "6 個裡使用頻率最高，減少效能坑"
+      "AI 寫 code 時直接套用，減少效能坑",
+      "注意：repo 內目錄叫 react-best-practices，frontmatter name 才是這個"
     ],
-    path:"~/.claude/skills/vercel-react-best-practices"
+    source:"https://github.com/vercel-labs/agent-skills",
+    repoPath:"skills/react-best-practices/SKILL.md",
+    dir:"react-best-practices",
+    deps:[], mcp:false,
+    agents:{ "claude-code":"ok", zcode:"ok", codex:"unknown", openclaw:"unknown" },
+    meta:{ hasName:true, hasDesc:true, descLen:329, bodyKB:6.6, extraKeys:["license","metadata"] },
+    relations:{ with:["prototype","diagnosing-bugs"] }
   },
   {
-    id:"ui-ux-pro-max",
-    emoji:"🎨",
-    name:"ui-ux-pro-max",
-    source:null,
-    stage:"03-UI",
-    stars:4,
-    level:"補強判斷",
-    tag:"設計補手",
+    id:"ui-ux-pro-max", emoji:"🎨", name:"ui-ux-pro-max", tier:"core", stage:"03-UI",
+    stars:4, level:"補強判斷", tag:"設計補手",
     desc:[
       "補強 AI 在視覺、排版、互動上的判斷力",
       "工具首頁、教材網站、任何給人看的頁面",
       "與 impeccable 分工：pro-max 做好，impeccable 驗證"
     ],
-    path:"~/.claude/skills/ui-ux-pro-max"
+    source:null, repoPath:null, dir:"ui-ux-pro-max",
+    deps:[], mcp:false,
+    agents:{ "claude-code":"ok", zcode:"unknown", codex:"unknown", openclaw:"unknown" },
+    agentNote:"自建 skill，未公開來源，無法自動核對",
+    meta:null,
+    relations:{ with:["frontend-design"], before:["impeccable"] }
   },
   {
-    id:"impeccable",
-    emoji:"🛡️",
-    name:"impeccable",
-    source:"https://github.com/pbakaus/impeccable",
-    stage:"03-UI",
-    stars:5,
-    level:"優先度最高",
-    tag:"All-time favorite",
+    id:"impeccable", emoji:"🛡️", name:"impeccable", tier:"core", stage:"03-UI",
+    stars:5, level:"優先度最高", tag:"All-time favorite",
     desc:[
-      "23 個指令 + 61 個 deterministic UI 偵測器",
-      "把設計問題變成可檢查規則，部分不需 API key",
-      "符合「有驗收標準、不接受 AI 自稱完成」的工作偏好"
+      "23 個指令 + deterministic UI 偵測器，把設計問題變成可檢查規則",
+      "符合「有驗收標準、不接受 AI 自稱完成」的工作偏好",
+      "frontmatter 帶 user-invocable / argument-hint 等 Claude Code 專屬欄位"
     ],
-    path:"~/.claude/skills/impeccable"
+    source:"https://github.com/pbakaus/impeccable",
+    repoPath:".claude/skills/impeccable/SKILL.md",
+    dir:"impeccable",
+    deps:["impeccable CLI"], mcp:false,
+    agents:{ "claude-code":"ok", zcode:"partial", codex:"unknown", openclaw:"unknown" },
+    agentNote:"description 895 字元已接近 ZCode 的 1024 上限；另有 Claude Code 專屬 frontmatter",
+    meta:{ hasName:true, hasDesc:true, descLen:895, bodyKB:10.7, extraKeys:["version","user-invocable","argument-hint","license"] },
+    relations:{ after:["ui-ux-pro-max","frontend-design"], before:["agent-browser"] }
   },
   {
-    id:"seo-audit",
-    emoji:"🔍",
-    name:"seo-audit",
-    source:"https://www.skills.sh/coreyhaines31/marketingskills/seo-audit",
-    stage:"04-SEO",
-    stars:4,
-    level:"上線前必跑",
-    tag:"上線前必跑",
+    id:"seo-audit", emoji:"🔍", name:"seo-audit", tier:"core", stage:"04-SEO",
+    stars:4, level:"上線前必跑", tag:"上線前必跑",
     desc:[
       "檢查 title、meta、heading 結構、internal links",
       "圖片 alt、crawlability、indexation 全面健檢",
       "每個 GitHub Pages 站上線前跑一次"
     ],
-    path:"~/.claude/skills/seo-audit"
+    source:"https://www.skills.sh/coreyhaines31/marketingskills/seo-audit",
+    repoPath:null, dir:"seo-audit",
+    deps:[], mcp:false,
+    agents:{ "claude-code":"ok", zcode:"unknown", codex:"unknown", openclaw:"unknown" },
+    agentNote:"來源是 skills.sh 而非 GitHub raw，無法自動抓 SKILL.md 核對",
+    meta:null,
+    relations:{ after:["impeccable"], before:["agent-browser"] }
   },
-  /* ----- 以下 10 個：新進堆疊（801 萬下載 · 10 Skills One Agent） ----- */
+
+  /* ---- 以下 10 個為堆疊（optional） ---- */
   {
-    id:"find-skills",
-    emoji:"🔎",
-    name:"find-skills",
+    id:"find-skills", emoji:"🔎", name:"find-skills", tier:"stack", stage:"T-工具",
+    stars:4, level:"堆疊入口", tag:"能力發現", badge:"NEW",
+    desc:[
+      "不知道用什麼 skill 時先問它，搜尋 skills.sh 生態系",
+      "回傳最適合的 skill 與來源，搭配 npx skills 直接安裝",
+      "它是找工具的工具，不屬於流程任何一步"
+    ],
     source:"https://github.com/vercel-labs/skills",
-    stage:"01-需求",
-    stars:4,
-    level:"堆疊入口",
-    tag:"能力發現",
-    badge:"NEW",
-    desc:[
-      "堆疊第 1 步「發現」：不知道用什麼 skill 時先問它",
-      "搜尋 skills.sh 生態系，回傳最適合的 skill 與來源",
-      "搭配 npx skills 直接安裝，整組堆疊的起點"
-    ],
-    path:"~/.claude/skills/find-skills"
+    repoPath:"skills/find-skills/SKILL.md",
+    dir:"find-skills",
+    deps:[], mcp:false,
+    agents:{ "claude-code":"ok", zcode:"ok", codex:"unknown", openclaw:"unknown" },
+    meta:{ hasName:true, hasDesc:true, descLen:303, bodyKB:5.0, extraKeys:[] },
+    relations:{ before:["skill-creator"] }
   },
   {
-    id:"grill-me",
-    emoji:"🥩",
-    name:"grill-me",
+    id:"grill-me", emoji:"🥩", name:"grill-me", tier:"stack", stage:"01-需求",
+    stars:4, level:"想法壓測", tag:"壓力測試", badge:"NEW",
+    desc:[
+      "對你的 plan 窮追猛打，問到設計收斂才放行",
+      "與 grill-with-docs 分工：這管點子收斂，那管專案脈絡＋產文件",
+      "本體同樣是 stub：轉呼叫 grilling"
+    ],
     source:"https://github.com/mattpocock/skills",
-    stage:"01-需求",
-    stars:4,
-    level:"想法壓測",
-    tag:"壓力測試",
-    badge:"NEW",
-    desc:[
-      "堆疊第 2 步「壓力測試」：對你的 plan 窮追猛打",
-      "問到設計完全收斂才放行，避免帶洞實作",
-      "與 grill-with-docs 分工：這管點子收斂，那管專案脈絡"
-    ],
-    path:"~/.claude/skills/grill-me"
+    repoPath:"skills/productivity/grill-me/SKILL.md",
+    dir:"grill-me",
+    deps:["grilling"], mcp:false,
+    agents:{ "claude-code":"ok", zcode:"partial", codex:"unknown", openclaw:"unknown" },
+    agentNote:"body 只有一行 `Call the Skill tool with \"grilling\"` — 需要 grilling skill 才有作用",
+    meta:{ hasName:true, hasDesc:true, descLen:51, bodyKB:0.03, extraKeys:["disable-model-invocation"] },
+    relations:{ before:["grill-with-docs"] }
   },
   {
-    id:"frontend-design",
-    emoji:"📐",
-    name:"frontend-design",
-    source:"https://github.com/anthropics/skills",
-    stage:"03-UI",
-    stars:4,
-    level:"官方設計",
-    tag:"設計打底",
-    badge:"NEW",
+    id:"prototype", emoji:"🧪", name:"prototype", tier:"stack", stage:"02-開發",
+    stars:3, level:"先試後建", tag:"原型製作", badge:"NEW",
     desc:[
-      "Anthropics 官方前端設計 skill",
-      "堆疊「設計」步：版面層級、質感、互動準則",
-      "與 ui-ux-pro-max 同陣線：先設計好，再交 impeccable 驗"
+      "做丟棄式原型回答設計問題，驗證方向再投入正式實作",
+      "適合新功能走向不定、需要快速試錯時",
+      "體積很小（2.7 KB），幾乎不吃 context"
     ],
-    path:"~/.claude/skills/frontend-design"
-  },
-  {
-    id:"agent-browser",
-    emoji:"🌐",
-    name:"agent-browser",
-    source:"https://github.com/vercel-labs/agent-browser",
-    stage:"05-驗收",
-    stars:4,
-    level:"瀏覽器操作",
-    tag:"瀏覽器工作",
-    badge:"NEW",
-    desc:[
-      "堆疊「瀏覽器工作」步：agent 直接操作瀏覽器",
-      "Rust CLI + snapshot refs，省 context、不碰脆弱的 DOM selector",
-      "開頁、點擊、截圖、QA 驗證一把罩"
-    ],
-    path:"~/.claude/skills/agent-browser"
-  },
-  {
-    id:"prototype",
-    emoji:"🧪",
-    name:"prototype",
     source:"https://github.com/mattpocock/skills",
-    stage:"02-開發",
-    stars:3,
-    level:"先試後建",
-    tag:"原型製作",
-    badge:"NEW",
-    desc:[
-      "堆疊「原型製作」步：做丟棄式原型回答設計問題",
-      "驗證方向對不對，再投入正式實作",
-      "適合新功能走不定、需要快速試錯時"
-    ],
-    path:"~/.claude/skills/prototype"
+    repoPath:"skills/engineering/prototype/SKILL.md",
+    dir:"prototype",
+    deps:[], mcp:false,
+    agents:{ "claude-code":"ok", zcode:"ok", codex:"unknown", openclaw:"unknown" },
+    meta:{ hasName:true, hasDesc:true, descLen:179, bodyKB:2.7, extraKeys:[] },
+    relations:{ after:["brainstorming"], before:["vercel-react-best-practices"] }
   },
   {
-    id:"diagnosing-bugs",
-    emoji:"🐛",
-    name:"diagnosing-bugs",
-    source:"https://github.com/mattpocock/skills",
-    stage:"02-開發",
-    stars:5,
-    level:"除錯必備",
-    tag:"除錯紀律",
-    badge:"NEW",
+    id:"subagent-driven-development", emoji:"🧭", name:"subagent-driven-development", tier:"stack", stage:"02-開發",
+    stars:4, level:"任務協調", tag:"協調", badge:"NEW",
     desc:[
-      "堆疊「除錯」步：紀律化 debug 迴圈",
-      "建立重現 → 縮小範圍 → 假設 → 修復驗證",
-      "杜絕 AI 亂槍打鳥式改 code"
+      "主 agent 拆任務派給 subagent，平行推進、主線 context 保持乾淨",
+      "大重構、多檔案任務特別有感",
+      "body 31 KB，屬於較吃 metadata 預算的大 skill"
     ],
-    path:"~/.claude/skills/diagnosing-bugs"
-  },
-  {
-    id:"skill-creator",
-    emoji:"🛠️",
-    name:"skill-creator",
-    source:"https://github.com/anthropics/skills",
-    stage:"07-工具",
-    stars:4,
-    level:"自造 skill",
-    tag:"工具建構",
-    badge:"NEW",
-    desc:[
-      "Anthropics 官方：把重複流程打包成新 skill",
-      "堆疊「工具建構」步：為下一輪執行打包工作流",
-      "從 SKILL.md 到描述調優，一條龍"
-    ],
-    path:"~/.claude/skills/skill-creator"
-  },
-  {
-    id:"image-to-code",
-    emoji:"🖼️",
-    name:"image-to-code",
-    source:"https://github.com/leonxlnx/taste-skill",
-    stage:"03-UI",
-    stars:3,
-    level:"圖轉 code",
-    tag:"視覺化",
-    badge:"NEW",
-    desc:[
-      "堆疊「視覺化」步：先生設計圖 → 分析 → 寫 code",
-      "taste-skill 反 AI slop，拒絕生成醜 UI",
-      "視覺重要的頁面先用圖定調再動工"
-    ],
-    path:"~/.claude/skills/image-to-code"
-  },
-  {
-    id:"subagent-driven-development",
-    emoji:"🧭",
-    name:"subagent-driven-development",
     source:"https://github.com/obra/superpowers",
-    stage:"02-開發",
-    stars:4,
-    level:"任務協調",
-    tag:"協調",
-    badge:"NEW",
-    desc:[
-      "堆疊「協調」步：主 agent 拆任務派給 subagent",
-      "平行推進，主線 context 保持乾淨",
-      "大重構、多檔案任務特別有感"
-    ],
-    path:"~/.claude/skills/subagent-driven-development"
+    repoPath:"skills/subagent-driven-development/SKILL.md",
+    dir:"subagent-driven-development",
+    deps:[], mcp:false,
+    agents:{ "claude-code":"ok", zcode:"ok", codex:"unknown", openclaw:"unknown" },
+    meta:{ hasName:true, hasDesc:true, descLen:85, bodyKB:31.4, extraKeys:[] },
+    relations:{ with:["vercel-react-best-practices"] }
   },
   {
-    id:"mcp-builder",
-    emoji:"🔌",
-    name:"mcp-builder",
-    source:"https://github.com/anthropics/skills",
-    stage:"07-工具",
-    stars:3,
-    level:"自造 MCP",
-    tag:"工具建構",
-    badge:"NEW",
+    id:"frontend-design", emoji:"📐", name:"frontend-design", tier:"stack", stage:"03-UI",
+    stars:4, level:"官方設計", tag:"設計打底", badge:"NEW",
     desc:[
-      "Anthropics 官方：直接幫你寫 MCP server",
-      "把內部 API / 資料接成 agent 可用的工具",
-      "堆疊出口：現成能力不夠就自造"
+      "Anthropic 官方前端設計 skill：版面層級、質感、互動準則",
+      "與 ui-ux-pro-max 同陣線：先設計好，再交 impeccable 驗",
+      "純 markdown，沒有外部相依，跨 agent 最好搬"
     ],
-    path:"~/.claude/skills/mcp-builder"
+    source:"https://github.com/anthropics/skills",
+    repoPath:"skills/frontend-design/SKILL.md",
+    dir:"frontend-design",
+    deps:[], mcp:false,
+    agents:{ "claude-code":"ok", zcode:"ok", codex:"unknown", openclaw:"unknown" },
+    meta:{ hasName:true, hasDesc:true, descLen:204, bodyKB:8.9, extraKeys:["license"] },
+    relations:{ with:["ui-ux-pro-max"], before:["impeccable"] }
+  },
+  {
+    id:"image-to-code", emoji:"🖼️", name:"image-to-code", tier:"stack", stage:"03-UI",
+    stars:3, level:"圖轉 code", tag:"視覺化", badge:"NEW",
+    desc:[
+      "先生設計圖 → 分析 → 寫 code，視覺重要的頁面先用圖定調",
+      "taste-skill 反 AI slop，拒絕生成醜 UI",
+      "注意：repo 目錄叫 image-to-code-skill，frontmatter name 才是 image-to-code"
+    ],
+    source:"https://github.com/leonxlnx/taste-skill",
+    repoPath:"skills/image-to-code-skill/SKILL.md",
+    dir:"image-to-code-skill",
+    deps:[], mcp:false,
+    agents:{ "claude-code":"ok", zcode:"ok", codex:"unknown", openclaw:"unknown" },
+    meta:{ hasName:true, hasDesc:true, descLen:555, bodyKB:35.0, extraKeys:[] },
+    relations:{ with:["frontend-design"], before:["impeccable"] }
+  },
+  {
+    id:"diagnosing-bugs", emoji:"🐛", name:"diagnosing-bugs", tier:"stack", stage:"05-測試",
+    stars:5, level:"除錯必備", tag:"除錯紀律", badge:"NEW",
+    desc:[
+      "紀律化 debug 迴圈：重現 → 縮小範圍 → 假設 → 修復驗證",
+      "杜絕 AI 亂槍打鳥式改 code",
+      "測試階段的主力，不是開發階段的附屬品"
+    ],
+    source:"https://github.com/mattpocock/skills",
+    repoPath:"skills/engineering/diagnosing-bugs/SKILL.md",
+    dir:"diagnosing-bugs",
+    deps:[], mcp:false,
+    agents:{ "claude-code":"ok", zcode:"ok", codex:"unknown", openclaw:"unknown" },
+    meta:{ hasName:true, hasDesc:true, descLen:156, bodyKB:8.1, extraKeys:[] },
+    relations:{ before:["agent-browser"] }
+  },
+  {
+    id:"agent-browser", emoji:"🌐", name:"agent-browser", tier:"stack", stage:"06-驗收",
+    stars:4, level:"瀏覽器操作", tag:"瀏覽器工作", badge:"NEW",
+    desc:[
+      "agent 直接操作瀏覽器：開頁、點擊、截圖、QA 驗證",
+      "snapshot refs 省 context，不碰脆弱的 DOM selector",
+      "需要先裝 CLI：npm i -g agent-browser && agent-browser install"
+    ],
+    source:"https://github.com/vercel-labs/agent-browser",
+    repoPath:"skills/agent-browser/SKILL.md",
+    dir:"agent-browser",
+    deps:["agent-browser CLI (npm)"], mcp:false,
+    agents:{ "claude-code":"ok", zcode:"partial", codex:"unknown", openclaw:"unknown" },
+    agentNote:"frontmatter 以 allowed-tools 綁 Bash 權限；換平台要自行授權，且必須先裝 CLI",
+    meta:{ hasName:true, hasDesc:true, descLen:925, bodyKB:2.4, extraKeys:["allowed-tools","hidden"] },
+    relations:{ after:["diagnosing-bugs","impeccable"] }
+  },
+  {
+    id:"skill-creator", emoji:"🛠️", name:"skill-creator", tier:"stack", stage:"T-工具",
+    stars:4, level:"自造 skill", tag:"工具建構", badge:"NEW",
+    desc:[
+      "Anthropic 官方：把重複流程打包成新 skill",
+      "從 SKILL.md 到描述調優，一條龍",
+      "body 32 KB，需要時再啟用，別長期掛著吃 context"
+    ],
+    source:"https://github.com/anthropics/skills",
+    repoPath:"skills/skill-creator/SKILL.md",
+    dir:"skill-creator",
+    deps:[], mcp:false,
+    agents:{ "claude-code":"ok", zcode:"ok", codex:"unknown", openclaw:"unknown" },
+    meta:{ hasName:true, hasDesc:true, descLen:319, bodyKB:32.0, extraKeys:[] },
+    relations:{ after:["find-skills"], with:["mcp-builder"] }
+  },
+  {
+    id:"mcp-builder", emoji:"🔌", name:"mcp-builder", tier:"stack", stage:"T-工具",
+    stars:3, level:"自造 MCP", tag:"工具建構", badge:"NEW",
+    desc:[
+      "Anthropic 官方：直接幫你寫 MCP server",
+      "把內部 API / 資料接成 agent 可用的工具",
+      "現成能力不夠就自造 —— 堆疊的出口"
+    ],
+    source:"https://github.com/anthropics/skills",
+    repoPath:"skills/mcp-builder/SKILL.md",
+    dir:"mcp-builder",
+    deps:[], mcp:false,
+    agents:{ "claude-code":"ok", zcode:"ok", codex:"unknown", openclaw:"unknown" },
+    meta:{ hasName:true, hasDesc:true, descLen:277, bodyKB:8.5, extraKeys:["license"] },
+    relations:{ with:["skill-creator"] }
   }
 ];
 
-/* ---------- 3. 工作流程 7 步 ---------- */
-const WORKFLOW = [
-  { num:"01 需求", stage:"01-需求", body:"<b>grill-with-docs</b> + <b>brainstorming</b> 追問需求、產 ADR · <b>find-skills</b> 找能力 · <b>grill-me</b> 壓力測試點子" },
-  { num:"02 開發", stage:"02-開發", body:"<b>vercel-react-best-practices</b> 全程套規範 · <b>prototype</b> 先試錯 · <b>subagent-driven-development</b> 拆任務 · <b>diagnosing-bugs</b> 除錯" },
-  { num:"03 UI",   stage:"03-UI",   body:"<b>frontend-design</b> / <b>ui-ux-pro-max</b>（做）→ <b>image-to-code</b> 從圖還原 → <b>impeccable</b>（驗）" },
-  { num:"04 SEO",  stage:"04-SEO",  body:"<b>seo-audit</b> · meta / heading / 圖片 / crawl" },
-  { num:"05 驗收", stage:"05-驗收", body:"<b>agent-browser</b> 瀏覽器互動驗證 + <b>Playwright</b> + verification-before-completion" },
-  { num:"06 發布", stage:"06-發布", body:"git review → commit → GitHub Pages smoke test" },
-  { num:"07 工具", stage:"07-工具", body:"<b>skill-creator</b> 打包重複流程 → <b>mcp-builder</b> 擴充能力，回饋下一輪循環" }
+/* ---------- 4. 推薦使用順序 ---------- */
+const RECIPES = [
+  {
+    id:"web", icon:"▶", name:"新網站 / 新頁面", why:"從模糊需求一路到上線驗收的預設路線",
+    steps:["grill-with-docs","brainstorming","frontend-design","ui-ux-pro-max","vercel-react-best-practices","impeccable","seo-audit","agent-browser"]
+  },
+  {
+    id:"bug", icon:"🐛", name:"修一個 bug", why:"先收斂問題再動手，避免亂槍打鳥",
+    steps:["grill-me","diagnosing-bugs","vercel-react-best-practices","agent-browser"]
+  },
+  {
+    id:"redesign", icon:"🎨", name:"改版既有 UI", why:"設計先行、驗收在後，兩邊都不缺",
+    steps:["image-to-code","frontend-design","ui-ux-pro-max","impeccable","agent-browser"]
+  },
+  {
+    id:"capability", icon:"🛠️", name:"擴充 agent 能力", why:"現成的不夠用時，從找到造的完整路徑",
+    steps:["find-skills","skill-creator","mcp-builder"]
+  }
 ];
 
-/* ---------- 4. 暫不裝清單 ---------- */
-const NOT_INSTALLED = [
-  { name:"supabase-postgres-best-practices", tag:"第 7 候補", why:"碰到 Postgres / Supabase 專案再加載，避免過早複雜化核心流程" },
-  { name:"brandkit",                         tag:"不裝",     why:"還沒有品牌系統需求" },
-  { name:"browser-use",                      tag:"不裝",     why:"已有 Playwright，功能重疊" },
-  { name:"shadcn/ui",                        tag:"另外處理", why:"當元件庫用，不當 skill 裝" }
+/* ---------- 5. 不建議安裝 ---------- */
+const NOT_RECOMMENDED = [
+  { name:"supabase-postgres-best-practices", status:"LATER", why:"碰到 Postgres / Supabase 專案再加載，避免過早複雜化核心流程", alt:null },
+  { name:"brandkit",  status:"LATER", why:"還沒有品牌系統需求；leonxlnx/taste-skill 裡就有，要用隨時拿", alt:"image-to-code" },
+  { name:"browser-use", status:"SKIP", why:"與 agent-browser 功能重疊，且已有 Playwright", alt:"agent-browser" },
+  { name:"shadcn/ui", status:"OTHER", why:"這是元件庫不是 skill，用 npm 裝進專案即可", alt:null },
+  { name:"grilling / domain-modeling", status:"LATER", why:"grill-with-docs 與 grill-me 其實是 stub，真正的邏輯在這兩個 skill 裡；只用 Claude Code 可先不管，要跨平台就必須一起裝", alt:"grill-with-docs" }
 ];
 
-/* ---------- 5. 驗證清單 ---------- */
+/* ---------- 6. 自我驗證清單 ---------- */
 const CHECKLIST = [
-  "16 個 skill 都已列表（6 核心 + 10 堆疊 NEW）",
-  "來源連結可點擊（↗ 開新分頁）",
-  "安裝路徑一鍵複製（📋 → 已複製）",
-  "工作流程 7 步完整",
-  "暗版 / 亮版可切換，選擇存 localStorage",
-  "暫不裝清單附原因",
-  "評分資料存 localStorage，重新整理保留",
-  "篩選 pill 與 Showing N of 16 即時連動"
+  "所有數字（Skill 數、Core/Optional、階段數）皆由資料推導，沒有寫死",
+  "來源連結全部實際請求過，並核對 repo 內 SKILL.md 路徑存在",
+  "Health 檢查對照 ZCode 官方限制；抓不到來源的一律標「未驗證」而非假通過",
+  "搜尋可命中名稱、階段、說明、來源與 agent",
+  "工具類 skill 已脫離 pipeline，獨立在 Dev Tools 區",
+  "評分可匯出 / 匯入 JSON，換裝置不會消失",
+  "最小字級 16px，內文 23px；暗亮兩版對比皆達 WCAG AA",
+  "Plugin ZIP 內含 plugin.json 與各 skill 的取得指令，不偽造 SKILL.md 內容"
 ];
 
 /* ============================================================
-   以下為互動邏輯 — 一般不需改
+   以下為推導與互動邏輯 —— 加 skill 不需要動這裡
    ============================================================ */
-const STORAGE_KEY = "skills:ratings";
-const THEME_KEY = "skills:theme";
-let ratings = loadRatings();
-let activeFilter = "all"; // all | stage key | "rated"
+const RATINGS_KEY = "skills:ratings";
+const THEME_KEY   = "skills:theme";
 
-function loadRatings(){
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); }
-  catch(e){ return {}; }
-}
-function saveRatings(){
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(ratings)); }
-  catch(e){}
-}
+let ratings = load(RATINGS_KEY, {});
+let query = "";
+let fTier = "all";     // all | core | stack
+let fStage = "all";    // all | STAGES key | rated
+let fAgent = "all";    // all | agent id（只留該 agent 為 ok 的）
+let activeRecipe = RECIPES[0].id;
+const exportTargets = new Set(["claude-code","zcode"]);
 
-/* ---- theme（暗版 / 亮版切換） ---- */
-function getTheme(){
-  try { return localStorage.getItem(THEME_KEY) || "dark"; }
-  catch(e){ return "dark"; }
-}
+function load(k, dflt){ try { return JSON.parse(localStorage.getItem(k)) || dflt; } catch(e){ return dflt; } }
+function save(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }
+function esc(s){ return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c])); }
+function byId(id){ return SKILLS.find(s => s.id === id); }
+
+/* ---------- theme ---------- */
+function getTheme(){ try { return localStorage.getItem(THEME_KEY) || "dark"; } catch(e){ return "dark"; } }
 function applyTheme(t){
   document.documentElement.setAttribute("data-theme", t);
-  const btn = document.getElementById("themeBtn");
-  if (btn) btn.setAttribute("aria-label", t === "dark" ? "切換至亮色主題" : "切換至暗色主題");
+  const b = document.getElementById("themeBtn");
+  if (b) b.setAttribute("aria-label", t === "dark" ? "切換至亮色主題" : "切換至暗色主題");
 }
 function bindTheme(){
   document.getElementById("themeBtn").addEventListener("click", () => {
@@ -918,237 +1187,763 @@ function bindTheme(){
   });
 }
 
-/* ---- toast ---- */
+/* ---------- toast ---------- */
 let toastTimer = null;
-function toast(html){
+function toast(html, ms){
   const el = document.getElementById("toast");
   el.innerHTML = html;
   el.setAttribute("data-show","true");
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(()=>el.removeAttribute("data-show"), 1900);
+  toastTimer = setTimeout(() => el.removeAttribute("data-show"), ms || 2200);
 }
 
-/* ---- escape ---- */
-function esc(s){ return String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[c])); }
+/* ============================================================
+   Skill Health —— 拿 meta 去比對 ZCode 官方限制
+   抓不到來源的 skill（meta === null）一律回傳 unknown，不假裝通過
+   ============================================================ */
+function health(s){
+  const checks = [];
+  const m = s.meta;
+  const add = (state, text) => checks.push({ state, text });
 
-/* ---- counts ---- */
-function stageCount(stage){
-  return SKILLS.filter(s => s.stage === stage).length;
-}
-function ratedCount(){
-  return SKILLS.filter(s => ratings[s.id]).length;
+  if (!m){
+    add("unk","name / description 未驗證");
+    add("unk","description 長度未驗證");
+    add("unk","body 大小未驗證");
+  } else {
+    add(m.hasName ? "pass" : "fail", m.hasName ? "name 存在" : "缺少 name（ZCode 會拒絕）");
+    add(m.hasDesc ? "pass" : "fail", m.hasDesc ? "description 存在" : "缺少 description（ZCode 會拒絕）");
+    if (m.descLen > ZCODE_LIMITS.descriptionMax)      add("fail", `description ${m.descLen} 字元 — 超過 ${ZCODE_LIMITS.descriptionMax} 會被丟棄`);
+    else if (m.descLen > ZCODE_LIMITS.descriptionWarn) add("warn", `description ${m.descLen} 字元 — 接近 ${ZCODE_LIMITS.descriptionMax} 上限`);
+    else                                               add("pass", `description ${m.descLen} / ${ZCODE_LIMITS.descriptionMax} 字元`);
+    if (m.bodyKB >= ZCODE_LIMITS.bodyMaxKB) add("fail", `body ${m.bodyKB} KB — 超過 ${ZCODE_LIMITS.bodyMaxKB} KB 會被截斷`);
+    else if (m.bodyKB >= 30)                add("warn", `body ${m.bodyKB} KB — 偏大，會吃 metadata 預算`);
+    else                                    add("pass", `body ${m.bodyKB} KB / ${ZCODE_LIMITS.bodyMaxKB} KB`);
+
+    const claudeOnly = (m.extraKeys || []).filter(k => CLAUDE_ONLY_KEYS.includes(k));
+    if (claudeOnly.length) add("warn", `Claude 專屬欄位：${claudeOnly.join(", ")}`);
+    else                   add("pass", "無 Claude 專屬 frontmatter");
+  }
+
+  add(s.deps.length ? "warn" : "pass", s.deps.length ? `外部相依：${s.deps.join(", ")}` : "無外部相依");
+  add(s.mcp ? "warn" : "pass", s.mcp ? "需要 MCP server" : "不需要 MCP");
+  add(s.repoPath ? "pass" : "unk", s.repoPath ? "來源路徑已核對" : "來源無法自動核對");
+
+  const scored = checks.filter(c => c.state !== "unk");
+  const points = scored.reduce((n,c) => n + (c.state === "pass" ? 1 : c.state === "warn" ? 0.5 : 0), 0);
+  const max = scored.length || 1;
+  return {
+    checks,
+    score: Math.round(points * 10 / max),
+    scored: scored.length,
+    unknown: checks.length - scored.length
+  };
 }
 
-/* ---- render pills ---- */
+/* ---------- 由資料推導出來的統計 ---------- */
+function stats(){
+  const pipeline = Object.keys(STAGES).filter(k => STAGES[k].kind === "pipeline");
+  return {
+    total: SKILLS.length,
+    core:  SKILLS.filter(s => s.tier === "core").length,
+    stack: SKILLS.filter(s => s.tier === "stack").length,
+    stages: pipeline.length,
+    tools: SKILLS.filter(s => STAGES[s.stage] && STAGES[s.stage].kind === "tool").length,
+    agents: AGENTS.length,
+    rated: SKILLS.filter(s => ratings[s.id]).length,
+    zcodeReady: SKILLS.filter(s => s.agents.zcode === "ok").length
+  };
+}
+
+function renderStats(){
+  const st = stats();
+  const rows = [
+    { n: st.total,  k: "Skills"     },
+    { n: st.core,   k: "Core"       },
+    { n: st.stack,  k: "Optional"   },
+    { n: st.stages, k: "Stages"     },
+    { n: st.tools,  k: "Dev tools"  },
+    { n: st.zcodeReady, k: "ZCode ready" }
+  ];
+  document.getElementById("statbar").innerHTML = rows
+    .map(r => `<div class="stat"><span class="n">${r.n}</span><span class="k">${esc(r.k)}</span></div>`).join("");
+  document.getElementById("tbChip").textContent  = `${st.total} skills · ${st.stages} stages · ${st.agents} agents`;
+  document.getElementById("termChip").textContent = `${st.stages} stages · linear`;
+  document.getElementById("cardsChip").textContent = `${st.core} core · ${st.stack} optional`;
+  document.getElementById("flowChip").textContent = `${st.stages} stages + ${st.tools} tools`;
+  document.getElementById("niChip").textContent = `${NOT_RECOMMENDED.length} items`;
+  document.getElementById("activeChip").textContent = `${st.total} / ${st.total} active`;
+  document.getElementById("showTotal").textContent = st.total;
+}
+
+/* ---------- hero terminal ---------- */
+function renderTerm(){
+  const pipeline = Object.keys(STAGES).filter(k => STAGES[k].kind === "pipeline");
+  let html = pipeline.map(k => {
+    const st = STAGES[k];
+    const num = k.split("-")[0];
+    const names = SKILLS.filter(s => s.stage === k).map(s => s.name);
+    const right = names.length ? names.join(" · ") : "— 手動步驟";
+    return `<div class="t-line"><span class="t-num" style="color:${st.color}">${esc(num)}</span><span class="t-stage">${esc(k.split("-")[1])}</span><span class="dim">${esc(right)}</span></div>`;
+  }).join("");
+  const toolNames = SKILLS.filter(s => STAGES[s.stage] && STAGES[s.stage].kind === "tool").map(s => s.name);
+  html += `<div class="t-line" style="margin-top:.5rem"><span class="t-num" style="color:${STAGES["T-工具"].color}">T</span><span class="t-stage">工具</span><span class="dim">${esc(toolNames.join(" · "))}</span></div>`;
+  html += `<div class="t-line" style="margin-top:.4rem"><span class="dim">$</span><span class="cursor"></span></div>`;
+  document.getElementById("termBody").innerHTML = html;
+}
+
+/* ============================================================
+   篩選 pills
+   ============================================================ */
+function pillHTML(group, key, label, count, color, active){
+  const dot = color ? `<span class="dot"></span>` : "";
+  const styleAttr = color ? ` style="--c:${color}"` : "";
+  const stageAttr = color ? ` data-stage="${esc(key)}"` : "";
+  return `<button class="pill" type="button" data-group="${group}" data-filter="${esc(key)}"${stageAttr}${styleAttr} data-active="${active}">
+    ${dot}${esc(label)} <span class="cnt">${count}</span></button>`;
+}
 function renderPills(){
-  const root = document.getElementById("pills");
-  let html = pillHTML("all", "全部", SKILLS.length, null, true);
-  Object.keys(STAGES).forEach(stage => {
-    const c = stageCount(stage);
-    if (c > 0) html += pillHTML(stage, stage, c, STAGES[stage], false);
+  const st = stats();
+  document.getElementById("pillsTier").innerHTML =
+    `<span class="pill-label">分類</span>` +
+    pillHTML("tier","all","全部",st.total,null,fTier==="all") +
+    pillHTML("tier","core","Core",st.core,null,fTier==="core") +
+    pillHTML("tier","stack","Optional",st.stack,null,fTier==="stack");
+
+  let stageHTML = `<span class="pill-label">階段</span>` + pillHTML("stage","all","全部",st.total,null,fStage==="all");
+  Object.keys(STAGES).forEach(k => {
+    const c = SKILLS.filter(s => s.stage === k).length;
+    if (c > 0) stageHTML += pillHTML("stage",k,k,c,STAGES[k].color,fStage===k);
   });
-  html += pillHTML("rated", "⭐ 已評分", ratedCount(), null, false);
-  root.innerHTML = html;
+  stageHTML += pillHTML("stage","rated","⭐ 已評分",st.rated,null,fStage==="rated");
+  document.getElementById("pillsStage").innerHTML = stageHTML;
+
+  let agentHTML = `<span class="pill-label">Agent</span>` + pillHTML("agent","all","全部",st.total,null,fAgent==="all");
+  AGENTS.forEach(a => {
+    const c = SKILLS.filter(s => s.agents[a.id] === "ok").length;
+    agentHTML += pillHTML("agent",a.id,`${a.label} ✓`,c,null,fAgent===a.id);
+  });
+  document.getElementById("pillsAgent").innerHTML = agentHTML;
 }
-function pillHTML(key, label, count, color, active){
-  const isStage = key !== "all" && key !== "rated";
-  const dot = isStage ? `<span class="dot"></span>` : "";
-  const styleAttr = isStage ? ` style="--c:${color}"` : "";
-  const stageAttr = isStage ? ` data-stage="${esc(key)}"` : "";
-  return `<button class="pill" data-filter="${esc(key)}"${stageAttr}${styleAttr} data-active="${active}">
-    ${dot}${esc(label)} <span class="cnt">${count}</span>
-  </button>`;
+function bindPills(){
+  ["pillsTier","pillsStage","pillsAgent"].forEach(id => {
+    document.getElementById(id).addEventListener("click", e => {
+      const btn = e.target.closest(".pill");
+      if (!btn) return;
+      const g = btn.getAttribute("data-group"), v = btn.getAttribute("data-filter");
+      if (g === "tier") fTier = v; else if (g === "stage") fStage = v; else fAgent = v;
+      renderPills();
+      applyFilter();
+    });
+  });
 }
 
-/* ---- render cards ---- */
-function renderCards(){
-  const root = document.getElementById("grid");
-  root.innerHTML = SKILLS.map(cardHTML).join("");
-  document.getElementById("showTotal").textContent = SKILLS.length;
-  bindCardEvents();
-  applyFilter();
-}
+/* ============================================================
+   Skill 卡
+   ============================================================ */
+const MARK = { ok:"✓", partial:"⚠", unknown:"?" };
+const CLS  = { ok:"ok", partial:"warn", unknown:"unk" };
+const WORD = { ok:"支援", partial:"部分", unknown:"未驗證" };
+
 function cardHTML(s){
-  const color = STAGES[s.stage] || "var(--border)";
+  const stage = STAGES[s.stage] || {};
+  const color = stage.color || "var(--border)";
+  const h = health(s);
   const starsInline = "★".repeat(s.stars) + "☆".repeat(5 - s.stars);
+
   const srcHTML = s.source
-    ? `<a class="src" href="${esc(s.source)}" target="_blank" rel="noopener noreferrer">${esc(s.source.replace(/^https?:\/\//,''))}<span class="ext">↗</span></a>`
-    : `<span class="src">— 自建 / 內建</span>`;
-  return `<article class="card" data-id="${esc(s.id)}" data-stage="${esc(s.stage)}" style="--stage-color:${color}">
+    ? `<a class="src" href="${esc(s.source)}" target="_blank" rel="noopener noreferrer">${esc(s.source.replace(/^https?:\/\//,""))}${s.repoPath ? " / " + esc(s.repoPath) : ""} ↗</a>`
+    : `<span class="src">— 自建 / 無公開來源</span>`;
+
+  const badges = [
+    s.tier === "core" ? `<span class="mini-badge core">CORE</span>` : "",
+    s.badge ? `<span class="mini-badge">${esc(s.badge)}</span>` : ""
+  ].filter(Boolean).join("");
+
+  const compat = AGENTS.map(a => {
+    const v = s.agents[a.id] || "unknown";
+    return `<div class="compat-row"><span>${esc(a.label)}</span><span class="v ${CLS[v]}" title="${esc(WORD[v])}">${MARK[v]} ${esc(WORD[v])}</span></div>`;
+  }).join("");
+
+  /* 有未驗證項目時，分數只代表「已驗證的那幾項」，
+     所以標成部分計分、進度條改中性色，不讓它看起來像滿分 */
+  const hc = h.unknown ? "var(--star-off)"
+           : h.score >= 8 ? "var(--green)" : h.score >= 6 ? "var(--amber)" : "var(--red)";
+  const hLabel = h.unknown
+    ? `僅 ${h.scored} 項可計分 · ${h.unknown} 項未驗證`
+    : `${h.scored} 項全數驗證`;
+  const hNum = h.unknown ? `${h.score}/10<span style="color:var(--text-faint);font-weight:400">*</span>` : `${h.score}/10`;
+  const healthList = h.checks.map(c =>
+    `<li class="${c.state}"><span class="m">${c.state==="pass"?"✓":c.state==="warn"?"⚠":c.state==="fail"?"✗":"?"}</span><span>${esc(c.text)}</span></li>`
+  ).join("");
+
+  const rel = s.relations || {};
+  const relRow = (key, label) => {
+    const list = (rel[key] || []).filter(byId);
+    if (!list.length) return "";
+    return `<div class="rel"><span class="rk">${esc(label)}</span>${
+      list.map(id => `<button class="rel-link" type="button" data-goto="${esc(id)}">${esc(byId(id).name)}</button>`).join("")
+    }</div>`;
+  };
+
+  return `<article class="card" id="card-${esc(s.id)}" data-id="${esc(s.id)}" style="--stage-color:${color}">
     <div class="card-head">
-      <div class="emoji">${s.emoji}</div>
+      <div class="emoji" aria-hidden="true">${s.emoji}</div>
       <div class="titles">
-        <div class="name">${esc(s.name)}${s.badge?`<span class="mini-badge">${esc(s.badge)}</span>`:""}</div>
+        <div class="name">${esc(s.name)}${badges ? `<span class="badges">${badges}</span>` : ""}</div>
         ${srcHTML}
       </div>
       <span class="stage-tag">${esc(s.stage)}</span>
     </div>
+
     <div class="reco">
-      <span class="stars-inline">${starsInline}</span>
+      <span class="stars-inline" aria-hidden="true">${starsInline}</span>
       <span class="lvl">${esc(s.level)}</span>
+      <span>· ${esc(stage.en || "")}</span>
     </div>
-    <ul class="desc">${s.desc.map(d=>`<li>${esc(d)}</li>`).join("")}</ul>
-    <div class="install">
-      <code class="path">${esc(s.path)}</code>
-      <button class="copy" data-copy="${esc(s.path)}" title="複製安裝路徑" aria-label="複製安裝路徑">📋</button>
-    </div>
-    <div class="rating-row">
-      <div class="stars" data-skill="${esc(s.id)}">
-        ${[1,2,3,4,5].map(n=>`<button class="star" data-n="${n}" data-on="${ratings[s.id]===n}" aria-label="${n} 顆星">★</button>`).join("")}
+
+    <ul class="desc">${s.desc.map(d => `<li>${esc(d)}</li>`).join("")}</ul>
+
+    <div class="card-meta">
+      <div class="meta-box">
+        <h4>Compatibility</h4>
+        <div class="compat">${compat}</div>
       </div>
-      <div class="rating-meta">${ratings[s.id]?`<b>★ ${ratings[s.id]}/5</b>`:"未評分"}</div>
+      <div class="meta-box">
+        <h4>Skill Health</h4>
+        <div class="health-score"><span class="num">${hNum}</span><span class="lbl">${hLabel}</span></div>
+        <div class="health-bar"><i style="width:${h.score*10}%;--hc:${hc}"></i></div>
+        <ul class="health-list">${healthList}</ul>
+      </div>
+    </div>
+    ${s.agentNote ? `<div class="rel"><span class="rk">note</span><span style="color:var(--text-faint)">${esc(s.agentNote)}</span></div>` : ""}
+    ${relRow("before","接在前")}${relRow("after","接在後")}${relRow("with","搭配")}
+
+    <div class="install">
+      <code class="path">~/.claude/skills/${esc(s.dir)}</code>
+      <button class="copy" type="button" data-copy="~/.claude/skills/${esc(s.dir)}" title="複製安裝路徑" aria-label="複製 ${esc(s.name)} 的安裝路徑">📋</button>
+    </div>
+
+    <div class="rating-row">
+      <div class="stars" data-skill="${esc(s.id)}" role="group" aria-label="${esc(s.name)} 評分">
+        ${[1,2,3,4,5].map(n => `<button class="star" type="button" data-n="${n}" data-on="${ratings[s.id]===n}" aria-label="給 ${n} 顆星">★</button>`).join("")}
+      </div>
+      <div class="rating-meta">${ratings[s.id] ? `<b>★ ${ratings[s.id]}/5</b>` : "未評分"}</div>
     </div>
   </article>`;
 }
 
-/* ---- bind events (delegation) ---- */
+function renderCards(){
+  document.getElementById("grid").innerHTML = SKILLS.map(cardHTML).join("");
+  bindCardEvents();
+  applyFilter();
+}
+
 function bindCardEvents(){
   const grid = document.getElementById("grid");
-
-  // star clicks
   grid.querySelectorAll(".stars").forEach(group => {
     const id = group.getAttribute("data-skill");
     group.querySelectorAll(".star").forEach(btn => {
       const n = +btn.getAttribute("data-n");
       btn.addEventListener("mouseenter", () => previewStars(group, n));
-      btn.addEventListener("mouseleave", () => previewStars(group, ratings[id]||0));
+      btn.addEventListener("mouseleave", () => previewStars(group, ratings[id] || 0));
       btn.addEventListener("click", () => {
-        if (ratings[id] === n) {
-          delete ratings[id];
-          toast(`已清除 <b>${esc(skillById(id).name)}</b> 評分`);
-        } else {
-          ratings[id] = n;
-          const sk = skillById(id);
-          const fullTag = n===5 ? ` — <b>${esc(sk.tag)}</b> · ${esc(sk.name)}` : ` — ${esc(sk.name)}`;
-          toast(`★ ${n}/5${fullTag}`);
-        }
-        saveRatings();
-        renderCards();
-        renderPills();
-        updateClearBtn();
+        const sk = byId(id);
+        if (ratings[id] === n){ delete ratings[id]; toast(`已清除 <b>${esc(sk.name)}</b> 評分`); }
+        else { ratings[id] = n; toast(`★ ${n}/5 — ${n===5 ? `<b>${esc(sk.tag)}</b> · ` : ""}${esc(sk.name)}`); }
+        save(RATINGS_KEY, ratings);
+        renderCards(); renderPills(); renderStats(); updateButtons();
       });
     });
   });
-
-  // copy path
   grid.querySelectorAll(".copy").forEach(btn => {
-    btn.addEventListener("click", async () => {
+    btn.addEventListener("click", () => {
       const text = btn.getAttribute("data-copy");
-      try {
-        await navigator.clipboard.writeText(text);
-      } catch(e) {
-        // fallback
-        const ta = document.createElement("textarea");
-        ta.value = text; document.body.appendChild(ta);
-        ta.select(); document.execCommand("copy"); ta.remove();
-      }
+      copyText(text);
       btn.setAttribute("data-copied","true");
       toast(`已複製 <b>${esc(text)}</b>`);
-      setTimeout(()=>btn.removeAttribute("data-copied"), 1200);
+      setTimeout(() => btn.removeAttribute("data-copied"), 1300);
+    });
+  });
+  grid.querySelectorAll("[data-goto]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const id = btn.getAttribute("data-goto");
+      query = ""; fTier = "all"; fStage = "all"; fAgent = "all";
+      document.getElementById("q").value = "";
+      renderPills(); applyFilter();
+      const card = document.getElementById("card-" + id);
+      if (card){
+        card.scrollIntoView({ block:"center" });
+        card.style.transition = "box-shadow .25s ease";
+        card.style.boxShadow = "var(--shadow-pop)";
+        setTimeout(() => { card.style.boxShadow = ""; }, 1400);
+      }
     });
   });
 }
 function previewStars(group, n){
-  group.querySelectorAll(".star").forEach(b=>{
-    const bn = +b.getAttribute("data-n");
-    b.setAttribute("data-on", bn <= n ? "true" : "false");
-  });
+  group.querySelectorAll(".star").forEach(b => b.setAttribute("data-on", (+b.getAttribute("data-n")) <= n ? "true" : "false"));
 }
-function skillById(id){ return SKILLS.find(s=>s.id===id); }
+function copyText(text){
+  if (navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(text).catch(()=>fallbackCopy(text)); }
+  else fallbackCopy(text);
+}
+function fallbackCopy(text){
+  const ta = document.createElement("textarea");
+  ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+  document.body.appendChild(ta); ta.select();
+  try { document.execCommand("copy"); } catch(e){}
+  ta.remove();
+}
 
-/* ---- filter ---- */
+/* ============================================================
+   搜尋 + 篩選
+   ============================================================ */
+function haystack(s){
+  const stage = STAGES[s.stage] || {};
+  return [
+    s.id, s.name, s.stage, stage.en, stage.note, s.level, s.tag, s.tier,
+    s.tier === "core" ? "core 核心" : "stack optional 堆疊 選配",
+    s.source, s.repoPath, s.dir, s.desc.join(" "), s.agentNote,
+    (s.deps || []).join(" "),
+    AGENTS.filter(a => s.agents[a.id] === "ok").map(a => a.label + " " + a.id).join(" ")
+  ].filter(Boolean).join(" ").toLowerCase();
+}
+function matches(s){
+  if (fTier !== "all" && s.tier !== fTier) return false;
+  if (fStage === "rated"){ if (!ratings[s.id]) return false; }
+  else if (fStage !== "all" && s.stage !== fStage) return false;
+  if (fAgent !== "all" && s.agents[fAgent] !== "ok") return false;
+  if (query){
+    const q = query.toLowerCase().split(/\s+/).filter(Boolean);
+    const hay = haystack(s);
+    if (!q.every(t => hay.includes(t))) return false;
+  }
+  return true;
+}
 function applyFilter(){
   let visible = 0;
-  document.querySelectorAll(".card").forEach(card => {
-    const id = card.getAttribute("data-id");
-    let show = true;
-    if (activeFilter === "rated")      show = !!ratings[id];
-    else if (activeFilter !== "all")   show = card.getAttribute("data-stage") === activeFilter;
+  SKILLS.forEach(s => {
+    const card = document.getElementById("card-" + s.id);
+    if (!card) return;
+    const show = matches(s);
     card.setAttribute("data-hidden", show ? "false" : "true");
     if (show) visible++;
   });
   document.getElementById("showN").textContent = visible;
-  // empty state only meaningful for "rated" filter
   const empty = document.getElementById("empty");
-  empty.setAttribute("data-show", (activeFilter==="rated" && visible===0) ? "true" : "false");
+  empty.setAttribute("data-show", visible === 0 ? "true" : "false");
+  document.getElementById("emptyMsg").innerHTML =
+    fStage === "rated" && !query ? "還沒有已評分的 skill — <b>點星星試試</b>"
+    : query ? `找不到符合「<b>${esc(query)}</b>」的 skill` : "沒有符合條件的 skill";
 }
-
-/* ---- pills click ---- */
-function bindPills(){
-  document.getElementById("pills").addEventListener("click", e => {
-    const btn = e.target.closest(".pill");
-    if (!btn) return;
-    activeFilter = btn.getAttribute("data-filter");
-    document.querySelectorAll(".pill").forEach(p => p.setAttribute("data-active", p===btn ? "true" : "false"));
+function bindSearch(){
+  const input = document.getElementById("q");
+  const clear = document.getElementById("qClear");
+  input.addEventListener("input", () => {
+    query = input.value.trim();
+    clear.hidden = !query;
     applyFilter();
   });
-}
-
-/* ---- workflow ---- */
-function renderWorkflow(){
-  const root = document.getElementById("flow");
-  let html = "";
-  WORKFLOW.forEach((w, i) => {
-    const color = STAGES[w.stage] || "var(--border)";
-    html += `<div class="step" style="--step-color:${color}">
-      <div class="num">${esc(w.num)}</div>
-      <div class="body">${w.body}</div>
-    </div>`;
-    if (i < WORKFLOW.length - 1) {
-      html += `<div class="arrow-down">↓</div>`;
-    }
+  clear.addEventListener("click", () => {
+    input.value = ""; query = ""; clear.hidden = true; applyFilter(); input.focus();
   });
-  root.innerHTML = html;
+  document.addEventListener("keydown", e => {
+    if (e.key === "/" && document.activeElement !== input){ e.preventDefault(); input.focus(); }
+    if (e.key === "Escape" && document.activeElement === input){ input.value = ""; query = ""; clear.hidden = true; applyFilter(); }
+  });
 }
 
-/* ---- not installed ---- */
-function renderNotInstalled(){
-  document.getElementById("niList").innerHTML = NOT_INSTALLED.map(n =>
-    `<div class="ni">
-      <div>
+/* ============================================================
+   流程圖 + 工具區
+   ============================================================ */
+function renderWorkflow(){
+  const pipeline = Object.keys(STAGES).filter(k => STAGES[k].kind === "pipeline");
+  let html = "";
+  pipeline.forEach((k, i) => {
+    const st = STAGES[k];
+    const list = SKILLS.filter(s => s.stage === k);
+    const body = list.length
+      ? list.map(s => `<b>${esc(s.name)}</b>`).join(" · ") + ` — ${esc(st.note)}`
+      : `<span class="none">無對應 skill — ${esc(st.note)}（手動執行）</span>`;
+    html += `<div class="step" style="--step-color:${st.color}">
+      <div class="num">${esc(k)}</div>
+      <div class="body">${body}</div>
+    </div>`;
+    if (i < pipeline.length - 1) html += `<div class="arrow-down" aria-hidden="true">↓</div>`;
+  });
+  document.getElementById("flow").innerHTML = html;
+
+  const tools = SKILLS.filter(s => STAGES[s.stage] && STAGES[s.stage].kind === "tool");
+  document.getElementById("tools").innerHTML =
+    `<div class="rel" style="margin-bottom:.3rem"><span class="rk">Dev Tools · 不在流程線上</span></div>` +
+    tools.map(s => `<div class="tool-item">
+      <span class="e" aria-hidden="true">${s.emoji}</span>
+      <div><div class="nm">${esc(s.name)}</div><div class="rl">${esc(s.desc[0])}</div></div>
+    </div>`).join("");
+}
+
+/* ============================================================
+   推薦流程
+   ============================================================ */
+function renderRecipes(){
+  document.getElementById("recipePicker").innerHTML = RECIPES.map(r =>
+    `<button class="flow-btn" type="button" data-recipe="${esc(r.id)}" data-active="${r.id===activeRecipe}">${r.icon} ${esc(r.name)} <span style="opacity:.75">${r.steps.length}</span></button>`
+  ).join("");
+
+  const r = RECIPES.find(x => x.id === activeRecipe) || RECIPES[0];
+  const steps = r.steps.map(byId).filter(Boolean);
+  document.getElementById("recipeBody").innerHTML = `
+    <div class="rhead">
+      <span class="rname">${r.icon} ${esc(r.name)}</span>
+      <span class="rwhy">${esc(r.why)}</span>
+    </div>
+    <ol>${steps.map(s => `<li><code>${esc(s.name)}</code><span class="sg">${esc(s.stage)}</span></li>`).join("")}</ol>
+    <div class="btn-row">
+      <button class="btn" type="button" id="copyRecipe">📋 複製這串 skill 名稱</button>
+      <button class="btn" type="button" id="copyRecipePaths">📋 複製安裝路徑</button>
+    </div>`;
+
+  document.getElementById("copyRecipe").addEventListener("click", () => {
+    copyText(steps.map(s => "$" + s.name).join("\n"));
+    toast(`已複製 <b>${steps.length}</b> 個 skill 名稱`);
+  });
+  document.getElementById("copyRecipePaths").addEventListener("click", () => {
+    copyText(steps.map(s => "~/.claude/skills/" + s.dir).join("\n"));
+    toast(`已複製 <b>${steps.length}</b> 條安裝路徑`);
+  });
+}
+function bindRecipes(){
+  document.getElementById("recipePicker").addEventListener("click", e => {
+    const b = e.target.closest("[data-recipe]");
+    if (!b) return;
+    activeRecipe = b.getAttribute("data-recipe");
+    renderRecipes();
+  });
+}
+
+/* ============================================================
+   不建議安裝 / 清單
+   ============================================================ */
+function renderNotRecommended(){
+  document.getElementById("niList").innerHTML = NOT_RECOMMENDED.map(n => `
+    <div class="ni">
+      <div class="ni-top">
         <div class="nm">${esc(n.name)}</div>
-        <div class="why">${esc(n.why)}</div>
+        <span class="ni-tag" data-status="${esc(n.status)}">${esc(n.status)}</span>
       </div>
-      <span class="ni-tag">${esc(n.tag || "不裝")}</span>
-    </div>`
-  ).join("");
+      <div class="why">${esc(n.why)}</div>
+      ${n.alt ? `<div class="alt">替代方案 → <b>${esc(n.alt)}</b></div>` : ""}
+    </div>`).join("");
 }
-
-/* ---- checklist ---- */
 function renderChecklist(){
-  document.getElementById("checklist").innerHTML = CHECKLIST.map(c =>
-    `<li>${esc(c)}</li>`
-  ).join("");
+  document.getElementById("checklist").innerHTML = CHECKLIST.map(c => `<li>${esc(c)}</li>`).join("");
 }
 
-/* ---- clear ratings ---- */
-function updateClearBtn(){
-  document.getElementById("clearBtn").disabled = ratedCount() === 0;
+/* ============================================================
+   匯出：ZCode / Claude Code Plugin ZIP（純 JS，無外部套件）
+   ============================================================ */
+function rawURL(s){
+  if (!s.source || !s.repoPath) return null;
+  const m = s.source.match(/^https:\/\/github\.com\/([^/]+)\/([^/]+)/);
+  if (!m) return null;
+  return `https://raw.githubusercontent.com/${m[1]}/${m[2]}/HEAD/${s.repoPath}`;
 }
-function bindClear(){
+
+function renderTargets(){
+  document.getElementById("targets").innerHTML = AGENTS.map(a => {
+    const n = SKILLS.filter(s => s.agents[a.id] === "ok").length;
+    const supported = a.id === "claude-code" || a.id === "zcode";
+    return `<label class="target">
+      <input type="checkbox" value="${esc(a.id)}" ${exportTargets.has(a.id) ? "checked" : ""} ${supported ? "" : "disabled"} />
+      <span class="tn">${esc(a.label)}</span>
+      <span class="td">${supported ? `${n} 個可用 · ${esc(a.dir)}` : "尚無官方 plugin 格式"}</span>
+    </label>`;
+  }).join("");
+  document.getElementById("targets").querySelectorAll("input").forEach(cb => {
+    cb.addEventListener("change", () => {
+      if (cb.checked) exportTargets.add(cb.value); else exportTargets.delete(cb.value);
+      updateButtons();
+    });
+  });
+  document.getElementById("exportNote").innerHTML =
+    `ZIP 內<b>不含</b>第三方 SKILL.md 內文（著作權屬各原作者），改為附上已核對過的來源路徑與 <code>fetch-skills.sh</code>；` +
+    `執行它就會從各 repo 抓回真正的 SKILL.md 並放到正確目錄。相容性與 Health 資料量測於 ${VERIFIED_AT}。`;
+}
+
+function buildPluginFiles(){
+  const targets = AGENTS.filter(a => exportTargets.has(a.id));
+  const usable = SKILLS.filter(s => rawURL(s));
+  const skipped = SKILLS.filter(s => !rawURL(s));
+  const st = stats();
+
+  const plugin = {
+    name: "six-skills",
+    version: "1.0.0",
+    description: `Agent skill registry — ${st.total} skills across ${st.stages} engineering stages plus ${st.tools} dev tools.`,
+    author: { name: "Six-Skills-Dashboard" },
+    skills: "./skills"
+  };
+
+  const registry = {
+    generatedAt: new Date().toISOString(),
+    verifiedAt: VERIFIED_AT,
+    zcodeLimits: ZCODE_LIMITS,
+    stats: st,
+    agents: AGENTS,
+    stages: STAGES,
+    skills: SKILLS.map(s => ({
+      id:s.id, name:s.name, tier:s.tier, stage:s.stage, dir:s.dir,
+      source:s.source, repoPath:s.repoPath, raw:rawURL(s),
+      deps:s.deps, mcp:s.mcp, agents:s.agents, meta:s.meta,
+      relations:s.relations, health:health(s)
+    }))
+  };
+
+  const sh = [
+    "#!/usr/bin/env bash",
+    "# 從各來源 repo 取回真正的 SKILL.md。",
+    "# 路徑已於 " + VERIFIED_AT + " 核對存在。",
+    "set -euo pipefail",
+    'ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"',
+    'mkdir -p "$ROOT/skills"',
+    ""
+  ].concat(usable.map(s =>
+    `echo "→ ${s.name}"\nmkdir -p "$ROOT/skills/${s.dir}"\ncurl -fsSL "${rawURL(s)}" -o "$ROOT/skills/${s.dir}/SKILL.md"`
+  )).concat([
+    "",
+    'echo ""',
+    `echo "完成：${usable.length} 個 skill 已下載到 $ROOT/skills"`,
+    targets.map(t => `echo "  複製到 ${t.dir}/ 即可使用（${t.label}）"`).join("\n"),
+    skipped.length ? `echo "  略過（無公開 raw 來源）：${skipped.map(s=>s.name).join(", ")}"` : ""
+  ]).join("\n") + "\n";
+
+  const ps = [
+    "# 從各來源 repo 取回真正的 SKILL.md（Windows PowerShell）",
+    "$ErrorActionPreference = 'Stop'",
+    "$Root = Split-Path -Parent $MyInvocation.MyCommand.Path",
+    "New-Item -ItemType Directory -Force (Join-Path $Root 'skills') | Out-Null"
+  ].concat(usable.map(s =>
+    `Write-Host "-> ${s.name}"\nNew-Item -ItemType Directory -Force (Join-Path $Root 'skills\\${s.dir}') | Out-Null\nInvoke-WebRequest -Uri "${rawURL(s)}" -OutFile (Join-Path $Root 'skills\\${s.dir}\\SKILL.md')`
+  )).concat([`Write-Host "完成：${usable.length} 個 skill"`]).join("\n") + "\n";
+
+  const readme = [
+    "# six-skills — Agent Skill Plugin",
+    "",
+    `產生於 ${new Date().toISOString().slice(0,10)}，資料核對日 ${VERIFIED_AT}。`,
+    "",
+    "## 這包是什麼",
+    "",
+    `${st.total} 個 agent skill 的 registry：${st.core} 個 core、${st.stack} 個 optional，`,
+    `分佈在 ${st.stages} 個工程階段與 ${st.tools} 個開發工具。`,
+    "",
+    "## 為什麼沒有 SKILL.md",
+    "",
+    "這些 skill 的著作權屬各自的作者，本包不轉載內文，只提供**已核對過的來源路徑**。",
+    "執行下面其中一個腳本就會抓回真正的檔案：",
+    "",
+    "```bash",
+    "bash fetch-skills.sh          # macOS / Linux",
+    "powershell -File fetch-skills.ps1   # Windows",
+    "```",
+    "",
+    "## 安裝",
+    "",
+    "```bash",
+    targets.map(t => `cp -r skills/* ${t.dir}/`).join("\n") || "cp -r skills/* ~/.claude/skills/",
+    "```",
+    "",
+    "ZCode 也可以直接在 Settings → Skills 匯入既有的 Claude Code skill 目錄（symlink 或 copy）。",
+    "",
+    "## Skill 清單",
+    "",
+    "| Skill | Tier | Stage | Health | Claude Code | ZCode | 來源 |",
+    "|---|---|---|---|---|---|---|"
+  ].concat(SKILLS.map(s => {
+    const h = health(s);
+    return `| ${s.name} | ${s.tier} | ${s.stage} | ${h.score}/10 | ${MARK[s.agents["claude-code"]]} | ${MARK[s.agents.zcode]} | ${s.source ? s.repoPath ? `${s.source}/blob/HEAD/${s.repoPath}` : s.source : "自建"} |`;
+  })).concat([
+    "",
+    "## ZCode 限制（官方）",
+    "",
+    `- \`name\` 與 \`description\` 缺一不可`,
+    `- \`description\` 上限 ${ZCODE_LIMITS.descriptionMax} 字元，超過整個 skill 會被丟棄`,
+    `- SKILL.md body 超過 ${ZCODE_LIMITS.bodyMaxKB} KB 會在載入時被截斷`,
+    "- 啟用過多 skill 會消耗 metadata context 預算",
+    ""
+  ]).join("\n");
+
+  const files = [
+    { name:".zcode-plugin/plugin.json", text: JSON.stringify(plugin, null, 2) + "\n" },
+    { name:"registry.json",             text: JSON.stringify(registry, null, 2) + "\n" },
+    { name:"fetch-skills.sh",           text: sh },
+    { name:"fetch-skills.ps1",          text: ps },
+    { name:"README.md",                 text: readme }
+  ];
+  if (exportTargets.has("claude-code")){
+    files.push({ name:".claude-plugin/plugin.json", text: JSON.stringify(plugin, null, 2) + "\n" });
+  }
+  return files;
+}
+
+/* ---- 最小 ZIP writer（store，不壓縮） ---- */
+const CRC_TABLE = (() => {
+  const t = new Uint32Array(256);
+  for (let i = 0; i < 256; i++){
+    let c = i;
+    for (let k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+    t[i] = c >>> 0;
+  }
+  return t;
+})();
+function crc32(buf){
+  let c = 0xFFFFFFFF;
+  for (let i = 0; i < buf.length; i++) c = CRC_TABLE[(c ^ buf[i]) & 0xFF] ^ (c >>> 8);
+  return (c ^ 0xFFFFFFFF) >>> 0;
+}
+function makeZip(entries){
+  const enc = new TextEncoder();
+  const now = new Date();
+  const dosTime = ((now.getHours() << 11) | (now.getMinutes() << 5) | (now.getSeconds() >> 1)) & 0xFFFF;
+  const dosDate = (((now.getFullYear() - 1980) << 9) | ((now.getMonth() + 1) << 5) | now.getDate()) & 0xFFFF;
+
+  const items = entries.map(e => ({ name: enc.encode(e.name), data: enc.encode(e.text) }));
+  let localSize = 0, centralSize = 0;
+  items.forEach(it => { localSize += 30 + it.name.length + it.data.length; centralSize += 46 + it.name.length; });
+
+  const out = new Uint8Array(localSize + centralSize + 22);
+  const dv = new DataView(out.buffer);
+  let off = 0;
+  const offsets = [];
+
+  items.forEach(it => {
+    it.crc = crc32(it.data);
+    offsets.push(off);
+    dv.setUint32(off, 0x04034b50, true);
+    dv.setUint16(off + 4, 20, true);
+    dv.setUint16(off + 6, 0x0800, true);   // UTF-8 檔名
+    dv.setUint16(off + 8, 0, true);        // store
+    dv.setUint16(off + 10, dosTime, true);
+    dv.setUint16(off + 12, dosDate, true);
+    dv.setUint32(off + 14, it.crc, true);
+    dv.setUint32(off + 18, it.data.length, true);
+    dv.setUint32(off + 22, it.data.length, true);
+    dv.setUint16(off + 26, it.name.length, true);
+    dv.setUint16(off + 28, 0, true);
+    off += 30;
+    out.set(it.name, off); off += it.name.length;
+    out.set(it.data, off); off += it.data.length;
+  });
+
+  const cdStart = off;
+  items.forEach((it, i) => {
+    dv.setUint32(off, 0x02014b50, true);
+    dv.setUint16(off + 4, 20, true);
+    dv.setUint16(off + 6, 20, true);
+    dv.setUint16(off + 8, 0x0800, true);
+    dv.setUint16(off + 10, 0, true);
+    dv.setUint16(off + 12, dosTime, true);
+    dv.setUint16(off + 14, dosDate, true);
+    dv.setUint32(off + 16, it.crc, true);
+    dv.setUint32(off + 20, it.data.length, true);
+    dv.setUint32(off + 24, it.data.length, true);
+    dv.setUint16(off + 28, it.name.length, true);
+    dv.setUint16(off + 30, 0, true);
+    dv.setUint16(off + 32, 0, true);
+    dv.setUint16(off + 34, 0, true);
+    dv.setUint16(off + 36, 0, true);
+    dv.setUint32(off + 38, 0, true);
+    dv.setUint32(off + 42, offsets[i], true);
+    off += 46;
+    out.set(it.name, off); off += it.name.length;
+  });
+
+  dv.setUint32(off, 0x06054b50, true);
+  dv.setUint16(off + 8, items.length, true);
+  dv.setUint16(off + 10, items.length, true);
+  dv.setUint32(off + 12, off - cdStart, true);
+  dv.setUint32(off + 16, cdStart, true);
+  dv.setUint16(off + 20, 0, true);
+
+  return new Blob([out], { type: "application/zip" });
+}
+function download(blob, filename){
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1500);
+}
+
+/* ============================================================
+   評分 匯出 / 匯入 / 清除
+   ============================================================ */
+function updateButtons(){
+  const n = stats().rated;
+  document.getElementById("clearBtn").disabled = n === 0;
+  document.getElementById("exportRatings").disabled = n === 0;
+  document.getElementById("exportPlugin").disabled = exportTargets.size === 0;
+}
+function bindActions(){
+  document.getElementById("exportPlugin").addEventListener("click", () => {
+    const files = buildPluginFiles();
+    download(makeZip(files), "six-skills-plugin.zip");
+    toast(`已產生 <b>six-skills-plugin.zip</b> · ${files.length} 個檔案`);
+  });
+  document.getElementById("exportRegistry").addEventListener("click", () => {
+    const f = buildPluginFiles().find(x => x.name === "registry.json");
+    download(new Blob([f.text], { type:"application/json" }), "registry.json");
+    toast("已匯出 <b>registry.json</b>");
+  });
+  document.getElementById("exportRatings").addEventListener("click", () => {
+    download(new Blob([JSON.stringify(ratings, null, 2)], { type:"application/json" }), "skills-ratings.json");
+    toast(`已匯出 <b>${stats().rated}</b> 筆評分`);
+  });
+  document.getElementById("importRatings").addEventListener("click", () => document.getElementById("importFile").click());
+  document.getElementById("importFile").addEventListener("change", e => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const fr = new FileReader();
+    fr.onload = () => {
+      try {
+        const data = JSON.parse(fr.result);
+        if (!data || typeof data !== "object" || Array.isArray(data)) throw new Error("格式不對");
+        let n = 0;
+        Object.keys(data).forEach(k => {
+          const v = +data[k];
+          if (byId(k) && v >= 1 && v <= 5){ ratings[k] = Math.round(v); n++; }
+        });
+        save(RATINGS_KEY, ratings);
+        renderCards(); renderPills(); renderStats(); updateButtons();
+        toast(n ? `已匯入 <b>${n}</b> 筆評分` : "檔案裡沒有可用的評分");
+      } catch(err){ toast("匯入失敗：不是有效的評分 JSON"); }
+      e.target.value = "";
+    };
+    fr.readAsText(file);
+  });
   document.getElementById("clearBtn").addEventListener("click", () => {
-    if (ratedCount() === 0) return;
+    if (stats().rated === 0) return;
     ratings = {};
-    saveRatings();
-    renderCards();
-    renderPills();
-    updateClearBtn();
+    save(RATINGS_KEY, ratings);
+    renderCards(); renderPills(); renderStats(); updateButtons();
     toast("🧹 已清除全部評分");
   });
 }
 
-/* ---- init ---- */
+/* ---------- init ---------- */
 function init(){
   applyTheme(getTheme());
+  renderStats();
+  renderTerm();
   renderPills();
   renderCards();
   renderWorkflow();
-  renderNotInstalled();
+  renderRecipes();
+  renderNotRecommended();
   renderChecklist();
-  bindPills();
-  bindClear();
-  bindTheme();
-  updateClearBtn();
+  renderTargets();
+  bindTheme(); bindPills(); bindSearch(); bindRecipes(); bindActions();
+  updateButtons();
 }
 init();
 </script>
