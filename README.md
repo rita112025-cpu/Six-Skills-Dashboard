@@ -2,7 +2,7 @@
 
 一頁式 **Agent Skill Registry**：16 個 skill 集中管理，標註工程階段、跨 agent 相容性、依 ZCode 官方限制實測的 Skill Health，可搜尋、可篩選、可匯出成 plugin。交付檔為單檔 HTML、零依賴，丟上 GitHub Pages 即可上線。
 
-> 線上版：<https://rita112025-cpu.github.io/Six-Skills-Dashboard/>
+> 線上版：<https://rita112025-cpu.github.io/agent-skills-dashboard/>
 
 ## ✨ 功能
 
